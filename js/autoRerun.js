@@ -1,6 +1,6 @@
 var timer=null;
 
-function update_lsm_tree(id, lsm_tree_type, lsm_tree_L, lsm_tree_T, lsm_tree_mbuffer, N, E, ui_ratio){
+function update_lsm_tree(id, lsm_tree_type, lsm_tree_L, lsm_tree_T, lsm_tree_mbuffer, N, E, obsolete_coefficient){
   if(id == 'lsm_tree_L' || id == 'UI-ratio'){
     var result = getLSMTreeT(lsm_tree_type);
     var T = result[0];
@@ -30,9 +30,9 @@ function update_lsm_tree(id, lsm_tree_type, lsm_tree_L, lsm_tree_T, lsm_tree_mbu
     }
     var tmpN;
     if(lsm_tree_type == 0){
-      tmpN = ui_ratio*((1 - 1/Math.pow(lsm_tree_T, L))/(1 - 1/lsm_tree_T)*N*(Math.floor(lsm_tree_T)-1) + lsm_tree_mbuffer/E - N)+N;
+      tmpN = obsolete_coefficient*((1 - 1/Math.pow(lsm_tree_T, L))/(1 - 1/lsm_tree_T)*N*(Math.floor(lsm_tree_T)-1) + lsm_tree_mbuffer/E - N)+N;
     }else{
-      tmpN = ui_ratio*((1 - 1/Math.pow(lsm_tree_T, L))/(1 - 1/lsm_tree_T)*N + lsm_tree_mbuffer/E - N) + N;
+      tmpN = obsolete_coefficient*((1 - 1/Math.pow(lsm_tree_T, L))/(1 - 1/lsm_tree_T)*N + lsm_tree_mbuffer/E - N) + N;
     }
     L = Math.log(tmpN*E*(lsm_tree_T-1)/lsm_tree_mbuffer+1)/Math.log(lsm_tree_T)-1;
     if(Math.abs(L - Math.round(L))<1e-6){
@@ -93,17 +93,17 @@ function re_run(e) {
     var v=parseFloat(document.getElementById("v").value);
     var qL=parseFloat(document.getElementById("qL").value);
 
-    var ui_ratio_str = document.getElementById("UI-ratio").value;
-    if(isNaN(ui_ratio_str)){
-      alert(ui_ratio_str+" is not valid.")
-      console.log("UI ratio is not valid: "+ui_ratio_str)
+    var obsolete_coefficient_str = document.getElementById("obsolete_coefficient").value;
+    if(isNaN(obsolete_coefficient_str)){
+      alert(obsolete_coefficient_str+" is not valid.")
+      console.log("UI ratio is not valid: "+obsolete_coefficient_str)
       document.getElementById("UI-ratio").value=1.0;
     }
-    var ui_ratio = parseFloat(ui_ratio_str);
-    if(ui_ratio > 1 || ui_ratio < 0){
-      alert(ui_ratio+" should be in the range of [0, 1].")
-      console.log("UI ratio should be in the range of (0, 1) :"+key_size)
-      document.getElementById("UI-ratio").value=1.0;
+    var obsolete_coefficient = parseFloat(obsolete_coefficient_str);
+    if(obsolete_coefficient > 1 || obsolete_coefficient < 0){
+      alert(obsolete_coefficient+" should be in the range of [0, 1].")
+      console.log("Obsolete coefficient should be in the range of (0, 1) :"+key_size)
+      document.getElementById("obsolete_coefficient").value=1.0;
     }
 
     if(r <= 0.0){
@@ -173,9 +173,9 @@ function re_run(e) {
       console.log("LSM-Tree level is invalid: "+L);
       var tmpN;
       if(lsm_tree_type == 0){
-        tmpN = ui_ratio*((1 - 1/lsm_tree_T)/(1 - 1/(Math.pow(lsm_tree_T, L)))*N*(Math.floor(lsm_tree_T)-1) - N)+N;
+        tmpN = obsolete_coefficient*((1 - 1/lsm_tree_T)/(1 - 1/(Math.pow(lsm_tree_T, L)))*N*(Math.floor(lsm_tree_T)-1) - N)+N;
       }else{
-        tmpN = ui_ratio*((1 - 1/lsm_tree_T)/(1 - 1/(Math.pow(lsm_tree_T, L)))*N - N) + N;
+        tmpN = obsolete_coefficient*((1 - 1/lsm_tree_T)/(1 - 1/(Math.pow(lsm_tree_T, L)))*N - N) + N;
       }
       L = Math.ceil(Math.log(tmpN*E*(lsm_tree_T-1)/lsm_tree_mbuffer+1/lsm_tree_T)/Math.log(lsm_tree_T))
       document.getElementById("lsm_tree_L").value = L;
@@ -221,7 +221,7 @@ function re_run(e) {
       lsm_tree_T = P/E;
     }
     var lsm_tree_type=getBoldButtonByName("lsm_tree_type");
-    update_lsm_tree(event.target.id, lsm_tree_type, lsm_tree_L, lsm_tree_T, lsm_tree_mbuffer, N, E, ui_ratio);
+    update_lsm_tree(event.target.id, lsm_tree_type, lsm_tree_L, lsm_tree_T, lsm_tree_mbuffer, N, E, obsolete_coefficient);
 
     //B_epsilon tree
     var fanout = document.getElementById("B_epsilon_tree_fanout").value;

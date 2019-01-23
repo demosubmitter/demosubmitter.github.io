@@ -336,8 +336,8 @@
                       </div>
                       <br>
                       <div class="input-group">
-                        <span class="input-group-addon"><span data-tooltip="This parameter controls the balance between updates vs. insertions among writes in the workload. When set to 0, there only insertions and so all existing entries are unique. When set to 1, there are only updates, and this leads to the highest possible number of obsolete entries in each of the structures. This parameter can assume any value between 0 and 1 to show the resulting space-amplification arising from different balances between inserts and updates" data-tooltip-position="bottom"> Obsolescence Coefficient </span></span>
-                        <input id="UI-ratio" type="text" class="form-control" aria-label="Update/Insert ratio" placeholder=" ui_ratio (e.g., 1)"  style="text-align:right" onchange="re_run(event, 'input4')" onwheel="re_run(event, 'input4')" />
+                        <span class="input-group-addon"><span data-tooltip="Obsolescence Coefficient" data-tooltip-position="bottom"> Obsolescence Coefficient </span></span>
+                        <input id="obsolete_coefficient" type="text" class="form-control" aria-label="Obsolescence Coefficient" placeholder=" Obsolescence Coefficient (e.g., 0)"  style="text-align:right" onchange="re_run(event, 'input4')" onwheel="re_run(event, 'input4')" />
                       </div>
                     </div>
                     <div class="col-lg-4 col-md-4 col-sm-4">
@@ -443,8 +443,8 @@
                     </div>
                     <br>
                     <div class="input-group">
-                    <span class="input-group-addon"><span data-tooltip="bits per entry (e.g., 10)." data-tooltip-position="bottom"> Bloom filters' bits per entry</span></span>
-                      <input id="lsm_tree_mfilter_per_entry" type="text" class="form-control" aria-label="bits per entry" placeholder="Bloom filters' memory allocated to each entry (e.g., 5)" onchange="re_run(event, 'input7')" style="text-align:right"/>
+                    <span class="input-group-addon"><span data-tooltip="the fence and filters's memory budget (e.g., 10)." data-tooltip-position="bottom"> M<sub>f</sub> (bits per entry)</span></span>
+                      <input id="lsm_tree_memory_budget" type="text" class="form-control" aria-label="bits per entry" placeholder="Bloom filters' memory allocated to each entry (e.g., 5)" onchange="re_run(event, 'input7')" style="text-align:right"/>
                     </div>
                     <br>
                     <div class="input-group">
@@ -545,8 +545,8 @@
                     </div>
                     <br>
                   <div class="input-group" style="text-align: center">
-                  <span class="input-group-addon"><span data-tooltip="the fence andlters memory budget" data-tooltip-position="bottom">M<sub>f</sub> (bits per entry)</span></span>
-                    <input id="design_continuum_memory_budget" type="number" class="form-control" aria-label="design_continuum_memory_budget" placeholder="MF" style="text-align:right" onkeyup="re_run(event, 'input9')" onblur="re_run(event, 'input7')" onwheel="re_run(event, 'input7')"/>
+                  <span class="input-group-addon"><span data-tooltip="the fence and filters's memory budget" data-tooltip-position="bottom">M<sub>f</sub> (bits per entry)</span></span>
+                    <input id="design_continuum_memory_budget" class="form-control" aria-label="design_continuum_memory_budget" placeholder="MF" style="text-align:right" onkeyup="re_run(event, 'input9')" onblur="re_run(event, 'input7')"/>
                   </div>
                   <br>
                   <div class="input-group">
@@ -555,7 +555,7 @@
                   </div>
                   <br>
                 <div class="input-group" style="text-align: center">
-                <span class="input-group-addon"><span data-tooltip="the maximal size of a contiguous data region" data-tooltip-position="bottom">node size(D) </span></span>
+                <span class="input-group-addon"><span data-tooltip="the maximal blocks of a contiguous data region" data-tooltip-position="bottom">node size(D) </span></span>
                   <input id="design_continuum_D" type="number" class="form-control" aria-label="design_continuum_D" placeholder="D" style="text-align:right" onkeyup="re_run(event, 'input9')" onblur="re_run(event, 'input7')" onwheel="re_run(event, 'input7')"/>
                 </div>
 

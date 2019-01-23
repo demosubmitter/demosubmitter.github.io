@@ -44,7 +44,7 @@ function parseInputTextBoxes(prefix="lsm_tree")
 
 		//Workload
 		parsedBoxes.s = parseInt(document.getElementById("s").value.replace(/\D/g,''), 10);
-		parsedBoxes.ui_ratio = parseFloat(document.getElementById("UI-ratio").value);
+		parsedBoxes.obsolete_coefficient = parseFloat(document.getElementById("obsolete_coefficient").value);
 		parsedBoxes.w = parseFloat(document.getElementById("w").value);
 		parsedBoxes.r = parseFloat(document.getElementById("r").value);
 		parsedBoxes.v = parseFloat(document.getElementById("v").value);
@@ -56,16 +56,15 @@ function parseInputTextBoxes(prefix="lsm_tree")
 			parsedBoxes.T = parseFloat(document.getElementById(prefix+"_T").value);
 			parsedBoxes.isOptimalFPR = true;
 			parsedBoxes.leveltier = 3;
+			parsedBoxes.MF = parseFloat(document.getElementById(prefix+"_memory_budget").value)/8*parsedBoxes.N*(1 + parsedBoxes.obsolete_coefficient);
+
 			if(prefix == "lsm_tree"){
-				parsedBoxes.mfilter_per_entry = parseFloat(document.getElementById(prefix+"_mfilter_per_entry").value);
-				parsedBoxes.mfence_pointer_per_entry = parseFloat(document.getElementById(prefix+"_mfence_pointer_per_entry").value);
 				parsedBoxes.leveltier = getBoldButtonByName(prefix+"_type");
 				parsedBoxes.isOptimalFPR = getBoldButtonByName("fpr_policy"); // 0 -> fixed; 1 -> optimal for non-result point lookup ; 2 -> optimal for point lookup
 			}else{
 				parsedBoxes.D = parseInt(document.getElementById(prefix+"_D").value);
-				parsedBoxes.MF = parseInt(document.getElementById(prefix+"_memory_budget").value);
-				parsedBoxes.mfence_pointer_per_entry = parsedBoxes.key_size/(parsedBoxes.P/parsedBoxes.E);
-				parsedBoxes.mfilter_per_entry = parsedBoxes.MF - parsedBoxes.mfence_pointer_per_entry;
+
+
 			}
 
 		}else if(prefix == "B_epsilon_tree"){
@@ -122,7 +121,7 @@ function LSH_Table(inputParameters){
 	this.P = inputParameters.P;
 	this.E = inputParameters.E;
 	this.mbuffer = inputParameters.mbuffer;
-	this.ui_ratio = inputParameters.ui_ratio;
+	this.obsolete_coefficient = inputParameters.obsolete_coefficient;
 	this.B = this.P/this.E;
 	this.key_size=inputParameters.key_size;
 	this.hash_table_gc_threshold=inputParameters.hash_table_gc_threshold;
@@ -135,7 +134,7 @@ LSH_Table.prototype.getCostArray = function(){
 		"1",
 		"0",
 		this.N*this.key_size*8,
-		this.N*this.E*8*(1+this.ui_ratio*this.hash_table_gc_threshold)
+		this.N*this.E*8*(1+this.obsolete_coefficient*this.hash_table_gc_threshold)
 	];
 }
 
@@ -144,7 +143,7 @@ function B_EPSILON_Tree(inputParameters){
 	this.P = inputParameters.P;
 	this.E = inputParameters.E;
 	this.mbuffer = inputParameters.mbuffer;
-	this.ui_ratio = inputParameters.ui_ratio;
+	this.obsolete_coefficient = inputParameters.obsolete_coefficient;
 	this.B = this.P/this.E;
 	this.s = inputParameters.s;
 	this.fanout = inputParameters.fanout;
@@ -585,7 +584,7 @@ function initFiltersKey(N,E,mbuffer,T,K,Z,Y, mfilter_bits,P,leveltier, isOptimal
 		}
 		L = filter_array.length;
 	}
-	var remainingKeys=N-mbuffer/E;
+
 	if(leveltier < 4){ // origin website algorithm to construct the tree
 		var level = L - 1;
 		if(!filter_array_flag){
@@ -598,39 +597,41 @@ function initFiltersKey(N,E,mbuffer,T,K,Z,Y, mfilter_bits,P,leveltier, isOptimal
 			}
 			level = L - 1;
 		}
+		var tmpN = X*(T-1)/T;
+		for(var i = L - 1; i >= 0; i--){
+			filter_array[i].nokeys = tmpN;
+			tmpN /= T;
+		}
 
 
 		filter_array[L-1].nokeys+=N;
-		var remainingKeys = X - mbuffer/E;
-		if(remainingKeys < 0){
-			remainingKeys = 0;
-		}
+		// var remainingKeys = X;
 
 
-		while(true){
-			var tmpLevel = 1;
-			var tmp = mbuffer/E*T;
-			var prev = mbuffer/E;
-			while(remainingKeys > tmp && tmpLevel <= level){
-				prev = tmp;
-				tmp *= T;
-				tmpLevel += 1;
-			}
-			if(remainingKeys <= tmp && tmpLevel == 1){
-				filter_array[0].nokeys += remainingKeys;
-				break;
-			}else{
-					if(tmpLevel != L){
-						filter_array[tmpLevel - 1].nokeys += Math.ceil(Math.min(Math.floor(remainingKeys/prev), T)*prev);
-					}else{
-						filter_array[tmpLevel - 1].nokeys += Math.ceil(Math.min(Math.floor(remainingKeys/prev), T)*prev);
-					}
-
-					remainingKeys -= filter_array[tmpLevel - 1].nokeys;
-					level -= 1;
-
-			}
-		}
+		// while(true){
+		// 	var tmpLevel = 1;
+		// 	var tmp = mbuffer/E*T;
+		// 	var prev = mbuffer/E;
+		// 	while(remainingKeys > tmp && tmpLevel <= level){
+		// 		prev = tmp;
+		// 		tmp *= T;
+		// 		tmpLevel += 1;
+		// 	}
+		// 	if(remainingKeys <= tmp && tmpLevel == 1){
+		// 		filter_array[0].nokeys += remainingKeys;
+		// 		break;
+		// 	}else{
+		// 			if(tmpLevel != L){
+		// 				filter_array[tmpLevel - 1].nokeys += Math.ceil(Math.min(Math.floor(remainingKeys/prev), T)*prev);
+		// 			}else{
+		// 				filter_array[tmpLevel - 1].nokeys += Math.ceil(Math.min(Math.floor(remainingKeys/prev), T)*prev);
+		// 			}
+		//
+		// 			remainingKeys -= filter_array[tmpLevel - 1].nokeys;
+		// 			level -= 1;
+		//
+		// 	}
+		// }
 	}else{
 
 		var level = L - 1;
@@ -803,8 +804,8 @@ function getMonkeyFPassigment(N, E, mbuffer, T, K, Z, Y, mfilter_bits, P, levelt
     var value = 0;
     while (diff > 1) {
         change = false;
-        for (var i = 0; i < mem_level - 1; i++) {
-            for (var j = i + 1; j < mem_level ; j++) {
+        for (var i = 0; i < mem_level - Y - 1; i++) {
+            for (var j = i + 1; j < mem_level - Y ; j++) {
 							  var flag = 0;
                 filter_array[i].mem += diff;
                 filter_array[j].mem -= diff;
@@ -926,10 +927,9 @@ function initScenario2(){
 	// LSM-Tree
 	document.getElementById("lsm_tree_mbuffer").value=2; //in MB
 	//document.getElementById("lsm_tree_T").readOnly=true;
-	document.getElementById("lsm_tree_mfence_pointer_per_entry").value=8*8/(4096/16);
-	document.getElementById("lsm_tree_mfilter_per_entry").value=10; //0 bits per element
+	document.getElementById("lsm_tree_memory_budget").value=0.2; //0 bits per element
 	document.getElementById("lsm_tree_L").value=6;
-	document.getElementById("lsm_tree_T").value=8.8473431;
+	document.getElementById("lsm_tree_T").value=10;
 	document.getElementsByName("lsm_tree_type")[0].style.fontWeight='bold';
 
 	scenario2();
@@ -947,7 +947,7 @@ function initScenario3(){
 function initScenario4(){
 	// LSM-Tree
 	document.getElementById("design_continuum_mbuffer").value=2; //in MB
-	document.getElementById("design_continuum_memory_budget").value=10; //0 bits per element
+	document.getElementById("design_continuum_memory_budget").value=0.2; //0 bits per element
 	document.getElementById("design_continuum_L").value=6;
 	document.getElementById("design_continuum_K").value=4;
 	document.getElementById("design_continuum_Z").value=1;
@@ -968,7 +968,7 @@ function init(){
 
 	// Workload
 	document.getElementById("s").value = 8192;
-	document.getElementById("UI-ratio").value = 0.25;
+	document.getElementById("obsolete_coefficient").value = 0;
 	document.getElementById("w").value = 0.5;
 	document.getElementById("r").value = 0.0;
 	document.getElementById("v").value = 0.499999;
@@ -1191,8 +1191,7 @@ function draw_lsm_graph(prefix) {
 		var key_size=inputParameters.key_size;
     var mbuffer=inputParameters.mbuffer;
     var T=inputParameters.T;
-    var mfilter_per_entry=inputParameters.mfilter_per_entry;
-		var mfence_pointer_per_entry=inputParameters.mfence_pointer_per_entry;
+    var MF=inputParameters.MF;
 		var hash_table_gc_threshold=inputParameters.hash_table_gc_threshold;
     var P=inputParameters.P;
     var leveltier=inputParameters.leveltier;
@@ -1210,60 +1209,38 @@ function draw_lsm_graph(prefix) {
 		var qL=inputParameters.qL;
 		var qS=inputParameters.qS;
 		var lsm_bush_K=inputParameters.lsm_bush_K;
-		var X=inputParameters.X;
-		var ui_ratio = inputParameters.ui_ratio;
+		var obsolete_coefficient = inputParameters.obsolete_coefficient;
 
-		var tmp_mfilter_bits;
 		var filters;
-		var tmpX = X;
-		var tmpN;
-		if(leveltier >= 4){
-			// var tmpN = Math.ceil(mbuffer/E*lsm_bush_K*Math.pow(T, Math.pow(2, L - 1) - 1));
-			//tmp_mfilter_bits = tmp_mfilter_bits/N*tmpN;
-			// tmpX = Math.floor(getLLBushN(L, E, mbuffer, lsm_bush_K, T) - tmpN);
-			// X = N - tmpN;
-			// N = tmpN;
-			maxT = Math.pow(N*E/mbuffer/2, 1/(Math.pow(2, L-1) - 1));
-			maxN = getLLBushN_baseN(L, N, E, mbuffer, lsm_bush_K, maxT);
-			tmpN = ui_ratio*(maxN - N) + N;
-			X = tmpN - N;
-			tmp_mfilter_bits = mfilter_per_entry*tmpN;
-		}else{
-			// var tmpN = mbuffer/E*Math.pow(T, L-1)
-			// tmpX = N - Math.floor(Math.min(Math.floor(N/tmpN), T)*tmpN);
-			// N = Math.ceil(Math.min(Math.floor(N/tmpN), T)*tmpN);
-			L = inputParameters.L;
-			maxT = Math.pow((N*Z*E/mbuffer),1/L);
-			maxN = N*Z*(1-1/Math.pow(maxT, L+1))/(1-1/maxT);
-			tmpN = ui_ratio*(maxN - N) + N;
-			X = tmpN - N;
-			//N = N*Z;
-			tmp_mfilter_bits = mfilter_per_entry*tmpN;
+		var tmpN = N*(1 + obsolete_coefficient);
+		var L = Math.log(tmpN*E*(T - 1)/mbuffer+ 1)/Math.log(T) - 1;
+		var Y = 0;
+		var levels_with_Z_runs = 0;
+		if(prefix != "lsm_tree"){
+			var EULER = 2.71828182845904523536;
+			var X = Math.pow(Math.log(EULER)/Math.log(2), 2)*(Math.log(T)/Math.log(EULER)/(T-1) + Math.log(K/Z)/Math.log(EULER)/T)/8;
+
+			var cold_level_approximation = Math.log(tmpN/MF*(X/T+key_size/B)*T/(T-1))/Math.log(T);
+			Y = Math.max(Math.ceil(cold_level_approximation), 0);
+			// var mfence_pointer = 0;
+			// 	var Y = 0;
+			// 	if(leveltier < 4){
+			// 		Y = calc_Y(mfilter_per_entry, K, Z, T, L)
+			// 	}
+
 		}
 
-			var L;
-			if(leveltier < 4){
+		var mfence_pointer = (Math.pow(T, L - Y - 1) - 1)/(T - 1)*mbuffer/P*key_size*T;
+		var mfence_pointer_per_entry = mfence_pointer/tmpN;
+		var mfilter = MF - mfence_pointer;
+		var mfilter_per_entry = mfilter/tmpN;
+		var tmp_mfilter_bits = mfilter*8;
 
-				L = Math.log(tmpN*E*(T - 1)/mbuffer+ 1)/Math.log(T) - 1;
-				if(L - Math.round(L) < 1e-6){
-					L = Math.round(L);
-				}else{
-					L = Math.ceil(L);
-				}
-			}else if(leveltier == 4){
-				L = getLLBushL(tmpN, E, mbuffer, lsm_bush_K, T);
-			}else{
-				L = inputParameters.L;
-			}
-			var Y = 0;
-			if(leveltier < 4){
-				Y = calc_Y(mfilter_per_entry, K, Z, T, L)
-			}
-			document.getElementById(prefix+"_L").value = L;
+
+
+			document.getElementById(prefix+"_L").value = Math.ceil(L);
 
 	    //get BF allocation
-
-
 
 			if(isOptimalFPR == 0){
 				filters = getBaselineFPassigment(0, E, mbuffer, T, K, Z, Y,tmp_mfilter_bits, P, leveltier, tmpN, lsm_bush_K, T);
@@ -1536,16 +1513,23 @@ function draw_lsm_graph(prefix) {
 											capacity = previous_entries;
 										}
 										if(!full_flag){
-											message += "At this level, each run contains "+numberWithCommas(Math.floor(capacity/maxRuns))+" entries. The level is not full and only "+ (filters[i].nokeys*100/capacity).toExponential(3)+"% of its capacity (" + (Math.floor(filters[i].nokeys/(capacity/maxRuns))) + " run(s) ) are filled."
+											message += "At this level, each run contains "+numberWithCommas(Math.floor(filters[i].nokeys/maxRuns))+" entries. The level is not full and only "+ (filters[i].nokeys*100/capacity).toExponential(3)+"% of its capacity (" + (Math.floor(filters[i].nokeys/(capacity/maxRuns))) + " run(s) ) are filled."
 										}else{
-											message += "At this level, each run contains "+numberWithCommas(Math.floor(capacity/maxRuns))+" entries.";
+											message += "At this level, each run contains "+numberWithCommas(Math.floor(filters[i].nokeys/maxRuns))+" entries.";
 										}
 
-										var fpr = calc_R(filters[i]);
-										if(fpr < 0.00001){
-											message += " False positive rate of each individual run is " + fpr.toExponential(3) + "."
+
+
+										if(i != L - Y){
+											var fpr = calc_R(filters[i]);
+											if(fpr < 0.00001){
+												message += " False positive rate of each individual run is " + fpr.toExponential(3) + "."
+											}else{
+												message += " False positive rate of each individual run is " + (fpr*100).toFixed(3) + "%."
+											}
+											message += " The memory allocated for fence pointers is around " + formatBytes(filters[i].nokeys/(P/E)*key_size) + " bytes."
 										}else{
-											message += " False positive rate of each individual run is " + (fpr*100).toFixed(3) + "%."
+											message += " No memory for fence pointers and bloom filters in the cold level"
 										}
 
 
@@ -2948,7 +2932,7 @@ function AllocateFPR(fpr_type){
 
 function getLSMTreeT(lsm_tree_type, prefix="lsm_tree"){
 	var inputParameters = parseInputTextBoxes(prefix);
-	var ui_ratio = inputParameters.ui_ratio;
+	var obsolete_coefficient = inputParameters.obsolete_coefficient;
 	var N = inputParameters.N;
 	var L = inputParameters.L;
 	var E = inputParameters.E;
@@ -2957,7 +2941,7 @@ function getLSMTreeT(lsm_tree_type, prefix="lsm_tree"){
 	var Tmin = 2;
 	var Tmax = Math.pow(N*Z/(mbuffer/E), 1/L);
 	var maxN = N*Z*(1-1/Math.pow(Tmax, L+1))/(1-1/Tmax);
-	var tmpN = ui_ratio*(maxN - N) + N;
+	var tmpN = obsolete_coefficient*(maxN - N) + N;
 	var tmpT;
 	var amp = function(x){return 1;};
 	if(lsm_tree_type == 0){
