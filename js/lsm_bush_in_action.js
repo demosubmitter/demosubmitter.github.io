@@ -1423,15 +1423,18 @@ function draw_lsm_graph(prefix) {
 									div_tmp_row.setAttribute("style","text-align: center;font-weight:bold;margin-top:-20px;width:100%;z-index:2;position:absolute");
 									var div_tmp_lsm_runs=document.createElement("div");
 									div_tmp_lsm_runs.setAttribute("style","text-align: center;height:25px;width:"+cur_length+"px;margin:auto auto");
-									var tmp = Math.ceil((i-1)/3);
-									var length_percent = 100/(2*tmp+2);
-									for(j = 0; j <= tmp; j++){
-										var div_col = document.createElement("div");
-										div_col.setAttribute("class","col-sm-3");
-											div_col.setAttribute("style","width:"+length_percent+"%;font-size:25px;padding:unset");
-										div_col.innerHTML="&#8601;"
-										div_tmp_lsm_runs.appendChild(div_col);
+									if(i >= filters.length - Y){
+										var tmp = Math.ceil((i-1)/3);
+										var length_percent = 100/(2*tmp+2);
+										for(j = 0; j <= tmp; j++){
+											var div_col = document.createElement("div");
+											div_col.setAttribute("class","col-sm-3");
+												div_col.setAttribute("style","width:"+length_percent+"%;font-size:25px;padding:unset");
+											div_col.innerHTML="&#8601;"
+											div_tmp_lsm_runs.appendChild(div_col);
+										}
 									}
+
 
 									// var div_col = document.createElement("div");
 									// div_col.setAttribute("class","col-sm-3");
