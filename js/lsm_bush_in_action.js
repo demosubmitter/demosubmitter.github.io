@@ -1230,7 +1230,7 @@ function draw_lsm_graph(prefix) {
 
 		}
 
-		var mfence_pointer = (Math.pow(T, L - Y - 1) - 1)/(T - 1)*mbuffer/P*key_size*T;
+		var mfence_pointer = (Math.pow(T, L - Y) - 1)/(T - 1)*mbuffer/P*key_size*T;
 		var mfence_pointer_per_entry = mfence_pointer/tmpN;
 		var mfilter = MF - mfence_pointer;
 		var mfilter_per_entry = mfilter/tmpN;

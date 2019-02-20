@@ -171,7 +171,10 @@
                     <!-- <p>At its core, CrimsonDB is an LSM-tree/B-tree hybrid built in C++. The first major technical innovation of CrimsonDB is published in our SIGMOD 2017 Monkey paper which offers optimal Bloom filter allocation and a first set of what-if design and auto-tuning properties. <a href="../../monkey" taget="_blank">Click here for our interactive online tool showcasing the what-if and the autotuning capabilities of Monkey!</a> The second major technical innovation of CrimsonDB is published in our SIGMOD 2018 Dostoevsky paper which offers better trade-offs between lookup costs, merge overheads, and storage space by identifying and removing superfluous merge operations. </p>
                     <br/>
                     <p class="text-center">Stay tuned for more!</p> -->
-                    <p>The first major technical innovation is published in our <a href="https://stratos.seas.harvard.edu/files/stratos/files/monkeykeyvaluestore.pdf" target="_blank"> SIGMOD 2017 Monkey paper</a>  which offers optimal Bloom filter allocation and a first set of what-if design and auto-tuning properties. The second major technical innovation of CrimsonDB is published in our <a href="http://nivdayan.github.io/dostoevsky.pdf" target="_blank"> SIGMOD 2018 Dostoevsky paper</a> which offers better trade-offs between lookup costs, merge overheads, and storage space by identifying and removing superfluous merge operations. Finally, in our <a href="https://stratos.seas.harvard.edu/files/stratos/files/datacalculator.pdf" target="_blank"> SIGMOD 2018 Data Calculator paper </a>  we present the first (rather) complete design space for key-value stores and learned cost models which enable what-if design. </p>
+                    <p>
+                    Some of the technology is published in research papers. The <a href="https://stratos.seas.harvard.edu/files/stratos/files/datacalculator.pdf" target="_blank"> Data Calculator paper in SIGMOD 2018 </a> shows how we can synthesize more data structures than stars on the sky to pick the right one for a given problem. The <a href="https://stratos.seas.harvard.edu/files/stratos/files/selfdesign.pdf" target="_blank"> Design continuums paper in CIDR 2019 </a> shows how we can perceive all core NoSQL data structures as a single data structure! The <a href="https://stratos.seas.harvard.edu/files/stratos/files/monkeykeyvaluestore.pdf" target="_blank"> Monkey SIGMOD 2017 </a> and <a href="https://stratos.seas.harvard.edu/files/stratos/files/monkeytods.pdf" target="_blank"> TODS 2018 </a> papers show how to pick the optimal number of bits for each bloom filter in an LSM-tree and how to pick the optimal size ratio and merge policy. The
+                    <a href="https://stratos.seas.harvard.edu/files/stratos/files/dostoevskykv.pdf" target="_blank"> Dostoevsky paper in SIGMOD 2018 </a> offers better trade-offs between lookup costs, merge overheads, and storage space by identifying and removing superfluous merge operations in NoSQL systems.
+                  </p>
                 </div>
             </div>
 
@@ -854,13 +857,35 @@
             </div>
         <div class="container">
 
+          <div class="row">
+              <div class="col-lg-12 col-md-12 publications">
+                  <p>
+                    Stratos Idreos, Niv Dayan, Wilson Qin, Mali Akmanalp, Sophie Hilgard, Andrew Ross,
+James Lennon, Varun Jain, Harshita Gupta, David Li, Zichen Zhu <br />
+                      <a href="https://stratos.seas.harvard.edu/files/stratos/files/selfdesign.pdf">Design Continuums and the Path Toward
+Self-Designing Key-Value Stores that Know and Learn</a> <br />
+                      In <span class="venue"> Biennial Conference on Innovative Data Systems Research (CIDR)</span>, 2019<br/><br/>
+                  </p>
+              </div>
+          </div>
+
+          <div class="row">
+              <div class="col-lg-12 col-md-12 publications">
+                  <p>
+                    Niv Dayan, Manos Athanassoulis, Stratos Idreos<br />
+                      <a href="https://stratos.seas.harvard.edu/files/stratos/files/monkeytods.pdf">Optimal Bloom Filters and Adaptive Merging for LSM-Trees</a> <br />
+                      In <span class="venue"> ACM Transactions on Database Systems </span>, 2018<br/><br/>
+                  </p>
+              </div>
+          </div>
+
             <div class="row">
                 <div class="col-lg-12 col-md-12 publications">
                     <p>
                         Niv Dayan, Stratos Idreos<br />
-                        <a href="http://nivdayan.github.io/dostoevsky.pdf">Dostoevsky: Better Space-Time Trade-Offs for LSM-Tree Based Key-Value Stores via Adaptive Removal of Superfluous Merging</a> <br />
+                        <a href="https://stratos.seas.harvard.edu/files/stratos/files/dostoevskykv.pdf">Dostoevsky: Better Space-Time Trade-Offs for LSM-Tree Based Key-Value Stores via Adaptive Removal of Superfluous Merging</a> <br />
                         <a href="https://www.youtube.com/watch?v=fmXgXripmh0&t=301s" target="_blank">[paper video]</a> <br/>
-                        In <span class="venue"> Proceedings of the ACM SIGMOD International Conference on Management of Data</span>, 2018<br/><br/>
+                        In <span class="venue"> ACM SIGMOD International Conference on Management of Data </span>, 2018<br/><br/>
                     </p>
                 </div>
             </div>
@@ -870,7 +895,7 @@
                         Stratos Idreos, Kostas Zoumpatianos, Brian Hentschel, Michael S. Kester, Demi Guo<br />
                         <a href="https://stratos.seas.harvard.edu/files/stratos/files/datacalculator.pdf">The Data Calculator: Data Structure Design and Cost Synthesis from First Principles and Learned Cost Models</a> <br />
                         <a href="https://www.youtube.com/watch?v=uFtkA3CEWY0" target="_blank">[paper video]</a> <br/>
-                        In <span class="venue"> Proceedings of the ACM SIGMOD International Conference on Management of Data</span>, 2018<br/><br/>
+                        In <span class="venue"> ACM SIGMOD International Conference on Management of Data </span>, 2018<br/><br/>
                     </p>
                 </div>
             </div>
@@ -881,7 +906,7 @@
                         <a href="https://stratos.seas.harvard.edu/files/stratos/files/monkeykeyvaluestore.pdf">Monkey: Optimal Navigable Key-Value Store</a> <br />
                         <a href="../../monkey" target="_blank">[paper website]</a>
                         <a href="https://www.youtube.com/watch?v=auI8BTws-f8" target="_blank">[paper video]</a> <br/>
-                        In <span class="venue"> Proceedings of the ACM SIGMOD International Conference on Management of Data</span>, 2017<br/><br/>
+                        In <span class="venue"> ACM SIGMOD International Conference on Management of Data </span>, 2017<br/><br/>
                     </p>
                 </div>
             </div>
