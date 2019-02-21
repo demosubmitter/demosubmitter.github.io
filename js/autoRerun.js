@@ -306,11 +306,12 @@ function re_run(e) {
     }
 
 
+
     var design_continuum_T = document.getElementById("design_continuum_T").value;
     if(isNaN(design_continuum_T)){
       alert("Design Continuum's T="+design_continuum_T+" is invalid.")
       console.log("Design Continuum's grow factor is invalid: "+design_continuum_T);
-      design_continuum_T = getLSMTreeT(3, "design_continuum");
+      design_continuum_T = getLSMTreeT(3, "design_continuum")[0];
       document.getElementById("design_continuum_T").value = design_continuum_T;
     }
     design_continuum_T = parseFloat(design_continuum_T);
@@ -334,6 +335,16 @@ function re_run(e) {
         alert("Max Node Size D="+design_continuum_D+" should locate in ["+ 1+ "," + max_max_node_size+"].")
         document.getElementById("design_continuum_D").value = 1;
         design_continuum_D = 1;
+    }
+
+    if(event.target.id == "design_continuum_L"){
+      var design_continuum_T = getLSMTreeT(3, "design_continuum")[0];
+      if(design_continuum_T <= 2){
+        document.getElementById("design_continuum_T").value = 2;
+      }else{
+        document.getElementById("design_continuum_T").value = design_continuum_T;
+      }
+
     }
     draw_lsm_graph("design_continuum");
 

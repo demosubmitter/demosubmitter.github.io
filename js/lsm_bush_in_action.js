@@ -2944,7 +2944,7 @@ function getLSMTreeT(lsm_tree_type, prefix="lsm_tree"){
 	var Tmin = 2;
 	var Tmax = Math.pow(N*Z/(mbuffer/E), 1/L);
 	var maxN = N*Z*(1-1/Math.pow(Tmax, L+1))/(1-1/Tmax);
-	var tmpN = obsolete_coefficient*(maxN - N) + N;
+	var tmpN = (obsolete_coefficient + 1) * N;
 	var tmpT;
 	var amp = function(x){return 1;};
 	if(lsm_tree_type == 0){
@@ -2954,7 +2954,7 @@ function getLSMTreeT(lsm_tree_type, prefix="lsm_tree"){
 	}
 	while(Tmax - Tmin > 1e-8){
 		tmpT = (Tmin + Tmax)/2;
-		tmpL = Math.log(tmpN*amp(tmpT)*E*(tmpT - 1)/mbuffer+ 1)/Math.log(tmpT)-1;
+		tmpL = Math.log(tmpN*E*(tmpT - 1)/mbuffer+ 1)/Math.log(tmpT)-1;
 		if(tmpL < L){
 			Tmax = tmpT;
 		}else if(tmpL > L){
