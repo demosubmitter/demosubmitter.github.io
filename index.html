@@ -392,16 +392,25 @@
                     <br>
                     <div class="input-group">
                     <span class="input-group-addon"><span data-tooltip="The fraction of obsolete entries at which point garbage-collection is triggered  (e.g., 0.5)." data-tooltip-position="bottom"> Garbage Collection Threshold </span></span>
-                      <input id="lsh_table_gc_threshold" type="text" class="form-control" aria-label="threshold for garbage collection" placeholder="The threshold ratio in (0,1) for garbage collection (e.g., 0.5)" style="text-align:right" onchange="re_run(event, 'input4')"/>
+                      <input id="lsh_table_gc_threshold" type="text" class="form-control" aria-label="threshold for garbage collection" placeholder="(e.g., 0.5)" style="text-align:right" onchange="re_run(event, 'input4')"/>
                     </div>
 
                     <br>
 
-                    <div class="input-group">
+                    <div class="input-group" style="display:none">
                       <span class="input-group-addon"><span data-tooltip="Buffer Size in MB (e.g., 2)." data-tooltip-position="bottom"> Buffer size (MB)</span></span>
                       <input id="lsh_table_mbuffer" type="number" class="form-control" aria-label="Buffer Size Mbuffer (MB)" placeholder="Buffer Size in MB (e.g., 2)"  style="text-align:right" onchange="re_run(event, 'input4')" onwheel="re_run(event, 'input4')"/>
                     </div>
 
+                    <div class="input-group">
+                    <span class="input-group-addon"><span data-tooltip="The size of compact key signature (e.g., 10)." data-tooltip-position="bottom"> Key Signature Size (bits) </span></span>
+                      <input id="lsh_table_key_signature_size" type="text" class="form-control" aria-label="size of key signature" placeholder="(e.g., 10)" style="text-align:right" onchange="re_run(event, 'input4')"/>
+                    </div>
+                    <br>
+                    <div class="input-group">
+                    <span class="input-group-addon"><span data-tooltip="the entries fraction to form the bucket chain (e.g., 1)." data-tooltip-position="bottom"> Hash Bucket entries fraction </span></span>
+                      <input id="lsh_table_hash_bucket_fraction" type="text" class="form-control" aria-label="entries fraction of hash table bucket" placeholder="1" style="text-align:right" onchange="re_run(event, 'input4')"/>
+                    </div>
 
                 </div>
 

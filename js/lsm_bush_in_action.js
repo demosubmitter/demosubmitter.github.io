@@ -53,45 +53,43 @@ function parseInputTextBoxes(prefix="lsm_tree")
 		// Configuration for an architecture
 		if(prefix == "lsm_tree" || prefix == "design_continuum"){
 			parsedBoxes.L = parseInt(document.getElementById(prefix+"_L").value.replace(/\D/g,''), 10);
-			parsedBoxes.T = parseFloat(document.getElementById(prefix+"_T").value);
 			parsedBoxes.isOptimalFPR = true;
-			parsedBoxes.leveltier = 3;
 
-
-			if(prefix == "lsm_tree"){
-				parsedBoxes.leveltier = getBoldButtonByName(prefix+"_type");
-				parsedBoxes.isOptimalFPR = getBoldButtonByName("fpr_policy"); // 0 -> fixed; 1 -> optimal for non-result point lookup ; 2 -> optimal for point lookup
-				parsedBoxes.MBF = parseFloat(document.getElementById(prefix+"_filters_memory_budget").value)/8*parsedBoxes.N*(1 + parsedBoxes.obsolete_coefficient);
-			}else{
+			if(prefix == "design_continuum"){
+				parsedBoxes.leveltier = 3;
+				parsedBoxes.fluidK = parseInt(document.getElementById("design_continuum_K").value.replace(/\D/g,''), 10);
+				parsedBoxes.fluidZ = parseInt(document.getElementById("design_continuum_Z").value.replace(/\D/g,''), 10);
+				parsedBoxes.T = parseFloat(document.getElementById(prefix+"_T").value);
+				tmpN = parsedBoxes.N*(1 + parsedBoxes.obsolete_coefficient*(parsedBoxes.fluidZ + 1/parsedBoxes.T - 1));
 				parsedBoxes.D = parseInt(document.getElementById(prefix+"_D").value);
-				parsedBoxes.MF = parseFloat(document.getElementById(prefix+"_memory_budget").value)/8*parsedBoxes.N*(1 + parsedBoxes.obsolete_coefficient);
-
+				parsedBoxes.MF = parseFloat(document.getElementById(prefix+"_memory_budget").value)/8*tmpN;
+			}else if(prefix == "lsm_tree"){
+				parsedBoxes.leveltier = getBoldButtonByName(prefix+"_type");
+				parsedBoxes.T = parseFloat(document.getElementById(prefix+"_T").value);
+				if(parsedBoxes.leveltier == 0){
+					parsedBoxes.fluidK = Math.floor(parsedBoxes.T) - 1;
+					parsedBoxes.fluidZ = Math.floor(parsedBoxes.T) - 1;
+				}else if(parsedBoxes.leveltier == 1){
+					parsedBoxes.fluidK = 1;
+					parsedBoxes.fluidZ = 1;
+				}else if(parsedBoxes.leveltier == 2){
+					parsedBoxes.fluidK = Math.floor(parsedBoxes.T) - 1;
+					parsedBoxes.fluidZ = 1;
+				}
+				tmpN = parsedBoxes.N*(1 + parsedBoxes.obsolete_coefficient*(parsedBoxes.fluidZ + 1/parsedBoxes.T - 1));
+				parsedBoxes.isOptimalFPR = getBoldButtonByName("fpr_policy"); // 0 -> fixed; 1 -> optimal for non-result point lookup ; 2 -> optimal for point lookup
+				parsedBoxes.MBF = parseFloat(document.getElementById(prefix+"_filters_memory_budget").value)/8*tmpN;
 			}
 
 		}else if(prefix == "B_epsilon_tree"){
 			parsedBoxes.fanout = parseInt(document.getElementById("B_epsilon_tree_fanout").value);
 		}else if(prefix == "lsh_table"){
 			parsedBoxes.hash_table_gc_threshold = parseFloat(document.getElementById("lsh_table_gc_threshold").value);
+			parsedBoxes.hash_table_key_signature_size = parseInt(document.getElementById("lsh_table_key_signature_size").value);
+			parsedBoxes.hash_table_hash_bucket_fraction = parseFloat(document.getElementById("lsh_table_hash_bucket_fraction").value);
 		}
 
 		parsedBoxes.mbuffer = parseFloat(document.getElementById(prefix+"_mbuffer").value.replace(/\D/g,''))*1048576;
-
-
-
-		if(parsedBoxes.leveltier == 3){
-			parsedBoxes.fluidK = parseInt(document.getElementById("design_continuum_K").value.replace(/\D/g,''), 10);
-			parsedBoxes.fluidZ = parseInt(document.getElementById("design_continuum_Z").value.replace(/\D/g,''), 10);
-		}else if(parsedBoxes.leveltier == 0){
-			parsedBoxes.fluidK = Math.floor(parsedBoxes.T) - 1;
-			parsedBoxes.fluidZ = Math.floor(parsedBoxes.T) - 1;
-		}else if(parsedBoxes.leveltier == 1){
-			parsedBoxes.fluidK = 1;
-			parsedBoxes.fluidZ = 1;
-		}else if(parsedBoxes.leveltier == 2){
-			parsedBoxes.fluidK = Math.floor(parsedBoxes.T) - 1;
-			parsedBoxes.fluidZ = 1;
-		}
-
 
     return parsedBoxes;
 }
@@ -126,16 +124,22 @@ function LSH_Table(inputParameters){
 	this.B = this.P/this.E;
 	this.key_size=inputParameters.key_size;
 	this.hash_table_gc_threshold=inputParameters.hash_table_gc_threshold;
+	this.hash_table_key_signature_size=inputParameters.hash_table_key_signature_size;
+	this.hash_table_hash_bucket_fraction=inputParameters.hash_table_hash_bucket_fraction;
 }
 
 LSH_Table.prototype.getCostArray = function(){
+	var maxN = this.N/(1 - this.hash_table_gc_threshold);
+	var tmpN = this.N + this.obsolete_coefficient*(maxN - this.N);
+	var min_pointer_size = Math.ceil(Math.log(tmpN/this.B)/Math.log(2))
+	var chain_length = 1.0/this.hash_table_hash_bucket_fraction;
 	return [
 		1/(this.B*this.hash_table_gc_threshold),
-		this.N/this.B,
+		tmpN/this.B,
 		"1",
-		"0",
-		this.N*this.key_size*8,
-		this.N*this.E*8*(1+this.obsolete_coefficient*this.hash_table_gc_threshold)
+		Math.pow(2, -this.hash_table_key_signature_size)*chain_length,
+		this.N*(this.hash_table_key_signature_size + this.hash_table_hash_bucket_fraction*min_pointer_size),
+		tmpN*this.E*8
 	];
 }
 
@@ -921,6 +925,9 @@ function initScenario1(){
 	// LSH-Table
 	document.getElementById("lsh_table_mbuffer").value=2; //in MB
 	document.getElementById("lsh_table_gc_threshold").value=0.5;
+	document.getElementById("lsh_table_key_signature_size").value=10;
+	document.getElementById("lsh_table_hash_bucket_fraction").value=1;
+
 	scenario1();
 }
 
@@ -928,7 +935,7 @@ function initScenario2(){
 	// LSM-Tree
 	document.getElementById("lsm_tree_mbuffer").value=2; //in MB
 	//document.getElementById("lsm_tree_T").readOnly=true;
-	document.getElementById("lsm_tree_filters_memory_budget").value=0.2; //0 bits per element
+	document.getElementById("lsm_tree_filters_memory_budget").value=2; //0 bits per element
 	document.getElementById("lsm_tree_L").value=6;
 	document.getElementById("lsm_tree_T").value=10;
 	document.getElementsByName("lsm_tree_type")[0].style.fontWeight='bold';
@@ -948,11 +955,11 @@ function initScenario3(){
 function initScenario4(){
 	// LSM-Tree
 	document.getElementById("design_continuum_mbuffer").value=2; //in MB
-	document.getElementById("design_continuum_memory_budget").value=0.2; //0 bits per element
-	document.getElementById("design_continuum_L").value=6;
-	document.getElementById("design_continuum_K").value=4;
-	document.getElementById("design_continuum_Z").value=1;
-	document.getElementById("design_continuum_T").value=10;
+	document.getElementById("design_continuum_memory_budget").value=2; //0 bits per element
+	document.getElementById("design_continuum_L").value=7;
+	document.getElementById("design_continuum_K").value=3;
+	document.getElementById("design_continuum_Z").value=2;
+	document.getElementById("design_continuum_T").value=7;
 	document.getElementById("design_continuum_D").value=10;
 
 	scenario4();
@@ -969,7 +976,7 @@ function init(){
 
 	// Workload
 	document.getElementById("s").value = 8192;
-	document.getElementById("obsolete_coefficient").value = 0;
+	document.getElementById("obsolete_coefficient").value = 0.25;
 	document.getElementById("w").value = 0.5;
 	document.getElementById("r").value = 0.0;
 	document.getElementById("v").value = 0.499999;
@@ -991,44 +998,52 @@ function init(){
 
 function scenario1()
 {
-	var inputParameters = parseInputTextBoxes();
+	var inputParameters = parseInputTextBoxes("lsh_table");
 	var E = inputParameters.E;
 	var N = inputParameters.N;
+	var obsolete_coefficient = inputParameters.obsolete_coefficient;
 	var key_size = inputParameters.key_size;
 	var hash_table_gc_threshold=inputParameters.hash_table_gc_threshold;
 	var mbuffer = parseFloat(document.getElementById("lsh_table_mbuffer").value)*1048576;
+
+	var maxN = N/(1 - hash_table_gc_threshold);
+	var tmpN = Math.round(N + obsolete_coefficient*(maxN - N));
+	var cost_array = draw_cost();
 
 		var result_div=document.getElementById("lsh_table_result");
 		removeAllChildren(result_div);
 
 		var div_row1=document.createElement("div");
 		div_row1.setAttribute("class","col-sm-12")
-		div_row1.setAttribute("style","text-align: center;height:70px;")
+		div_row1.setAttribute("style","text-align: center;height:70px;");
+		var div_col0 = document.createElement("div");
+		div_col0.setAttribute("class","col-sm-4");
+		div_row1.appendChild(div_col0);
 		var div_col1 = document.createElement("div");
-		div_col1.setAttribute("class","col-sm-4");
+		div_col1.setAttribute("class","col-sm-4 center");
 		var hash_table_img = document.createElement("img");
 		hash_table_img.setAttribute("class","img-responsive img-centered")
 		hash_table_img.setAttribute("style","width:60px;");
 		hash_table_img.src='./images/hash_table.png';
 		div_col1.appendChild(hash_table_img);
-		div_col1.setAttribute("data-tooltip","The hash table contains all unique keys and takes up " + formatBytes(N*key_size, 1) + ".");
+		div_col1.setAttribute("data-tooltip","The hash table contains all unique keys and takes up " + formatBytes(cost_array[4]/8, 1) + ".");
 		div_col1.setAttribute("data-tooltip-position","top");
 		div_row1.appendChild(div_col1);
-		var div_col2 = document.createElement("div");
-		div_col2.setAttribute("class","col-sm-4");
-		var buffer_img = document.createElement("img");
-		buffer_img.setAttribute("class","img-responsive img-centered")
-		buffer_img.setAttribute("style","width:60px;");
-		buffer_img.src='./images/buffer.png';
-		div_col2.appendChild(buffer_img);
-		div_col2.setAttribute("data-tooltip","The buffer takes up " + formatBytes(mbuffer, 1) + ".");
-		div_col2.setAttribute("data-tooltip-position","top");
-		div_row1.appendChild(div_col2);
+		// var div_col2 = document.createElement("div");
+		// div_col2.setAttribute("class","col-sm-4");
+		// var buffer_img = document.createElement("img");
+		// buffer_img.setAttribute("class","img-responsive img-centered")
+		// buffer_img.setAttribute("style","width:60px;");
+		// buffer_img.src='./images/buffer.png';
+		// div_col2.appendChild(buffer_img);
+		// div_col2.setAttribute("data-tooltip","The buffer takes up " + formatBytes(mbuffer, 1) + ".");
+		// div_col2.setAttribute("data-tooltip-position","top");
+		// div_row1.appendChild(div_col2);
 
 		var div_row2=document.createElement("div");
 		div_row2.setAttribute("class","col-sm-12")
 		div_row2.setAttribute("style","text-align: center;height:38px");
-		message = "LSM-Table maintains an in-memory hash table that maps from each key to its corresponding entry in the log, which contains " + numberWithCommas(N) + " entries."
+		message = "LSM-Table maintains an in-memory hash table that maps from each key to its corresponding entry in the log, which contains " + numberWithCommas(tmpN) + " entries."
 		div_row2.setAttribute("data-tooltip", message);
 		div_row2.setAttribute("data-tooltip-position", "bottom");
 
@@ -1052,7 +1067,7 @@ function scenario1()
 		result_div.append(div_row1);
 		result_div.append(div_row2);
 
-		draw_cost();
+
 
 		// reset_button_colors();
 		// document.getElementById("scenario1").style.background='#000000';
@@ -1214,7 +1229,8 @@ function draw_lsm_graph(prefix) {
 		var obsolete_coefficient = inputParameters.obsolete_coefficient;
 
 		var filters;
-		var tmpN = N*(1 + obsolete_coefficient);
+		var maxN = (Z + 1.0/T)*N;
+		var tmpN = N + obsolete_coefficient*(maxN - N);
 		var L = Math.log(tmpN*E*(T - 1)/mbuffer+ 1)/Math.log(T) - 1;
 		var levels_with_Z_runs = 0;
 		var Y = 0;
@@ -1429,7 +1445,6 @@ function draw_lsm_graph(prefix) {
 									div_tmp_row.setAttribute("style","text-align: center;font-weight:bold;margin-top:-20px;width:100%;z-index:2;position:absolute");
 									var div_tmp_lsm_runs=document.createElement("div");
 									div_tmp_lsm_runs.setAttribute("style","text-align: center;height:25px;width:"+cur_length+"px;margin:auto auto");
-									if(i >= filters.length - Y){
 										var tmp = Math.ceil((i-1)/3);
 										var length_percent = 100/(2*tmp+2);
 										for(j = 0; j <= tmp; j++){
@@ -1439,7 +1454,7 @@ function draw_lsm_graph(prefix) {
 											div_col.innerHTML="&#8601;"
 											div_tmp_lsm_runs.appendChild(div_col);
 										}
-									}
+
 
 
 									// var div_col = document.createElement("div");
@@ -1536,7 +1551,7 @@ function draw_lsm_graph(prefix) {
 											}else{
 												message += " False positive rate of each individual run is " + (fpr*100).toFixed(3) + "%."
 											}
-											message += " The memory allocated for fence pointers is around " + formatBytes(filters[i].nokeys/(P/E)*key_size) + " bytes."
+											message += " The memory allocated for fence pointers is around " + formatBytes(filters[i].nokeys/(P/E)*key_size) + "."
 										}else{
 											message += " No memory for fence pointers and bloom filters in the cold level"
 										}
@@ -1819,7 +1834,7 @@ function draw_cost(prefix="lsh_table"){
 		p_tmp.setAttribute("style","text-align: center;font-weight:bold;font-size:18px")
 		span_tmp.appendChild(p_tmp);
 		div_throughput.appendChild(span_tmp)
-
+		return cost_array;
 }
 
 function getHashTableCost(conf){
@@ -2947,10 +2962,9 @@ function getLSMTreeT(lsm_tree_type, prefix="lsm_tree"){
 	var E = inputParameters.E;
 	var Z = inputParameters.fluidZ;
 	var mbuffer = inputParameters.mbuffer;
+	var tmpN;
 	var Tmin = 2;
 	var Tmax = Math.pow(N*Z/(mbuffer/E), 1/L);
-	var maxN = N*Z*(1-1/Math.pow(Tmax, L+1))/(1-1/Tmax);
-	var tmpN = (obsolete_coefficient + 1) * N;
 	var tmpT;
 	var amp = function(x){return 1;};
 	if(lsm_tree_type == 0){
@@ -2960,6 +2974,7 @@ function getLSMTreeT(lsm_tree_type, prefix="lsm_tree"){
 	}
 	while(Tmax - Tmin > 1e-8){
 		tmpT = (Tmin + Tmax)/2;
+		tmpN = N*(1 + obsolete_coefficient*(Z + 1/tmpT - 1));
 		tmpL = Math.log(tmpN*E*(tmpT - 1)/mbuffer+ 1)/Math.log(tmpT)-1;
 		if(tmpL < L){
 			Tmax = tmpT;
@@ -2970,6 +2985,7 @@ function getLSMTreeT(lsm_tree_type, prefix="lsm_tree"){
 		}
 	}
 	tmpT = Tmin;
+	tmpN = N*(1 + obsolete_coefficient*(Z + 1/tmpT - 1));
 	var maxL = Math.log(tmpN*E*(tmpT - 1)/mbuffer/tmpT+ 1/tmpT)/Math.log(tmpT);
 	if(Math.abs(Math.round(maxL) - maxL) < 1e-6){
 		maxL = Math.round(maxL);

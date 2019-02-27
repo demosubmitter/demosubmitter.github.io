@@ -1,7 +1,7 @@
 var timer=null;
 
 function update_lsm_tree(id, lsm_tree_type, lsm_tree_L, lsm_tree_T, lsm_tree_mbuffer, N, E, obsolete_coefficient){
-  if(id == 'lsm_tree_L' || id == 'UI-ratio'){
+  if(id == 'lsm_tree_L' || id == 'UI-ratio' || id == 'lsm_tree_Z'){
     var result = getLSMTreeT(lsm_tree_type);
     var T = result[0];
     var maxL = result[1];
@@ -152,7 +152,6 @@ function re_run(e) {
     lsh_table_mbuffer *= 1048576;
     var hash_table_gc_threshold =document.getElementById("lsh_table_gc_threshold").value;
     if(isNaN(hash_table_gc_threshold)){
-
       alert("GC Threshold="+hash_table_gc_threshol+" is invalid.");
       console.log("The threshold ratio of garbage collection is invalid: "+hash_table_gc_threshold);
       document.getElementById("lsh_table_gc_threshold").value = 0.5;
@@ -163,6 +162,32 @@ function re_run(e) {
         alert("GC Threshold="+hash_table_gc_threshold+" should be in the range (0, 1).");
         document.getElementById("lsh_table_gc_threshold").value = 0.5;
         hash_table_gc_threshold = 0.5;
+    }
+    var hash_table_key_signature_size = document.getElementById("lsh_table_key_signature_size").value;
+    if(isNaN(hash_table_key_signature_size) || Number.isInteger(hash_table_key_signature_size)){
+      alert("The size of key signature="+hash_table_key_signature_size+" is invalid.");
+      console.log("Thesize of key signature is invalid: "+hash_table_key_signature_size);
+      document.getElementById("lsh_table_key_signature_size").value = 10;
+      hash_table_key_signature_size = 10;
+    }
+    hash_table_key_signature_size = parseInt(hash_table_key_signature_size);
+    if(hash_table_key_signature_size < 0){
+      alert("The size of key signature="+hash_table_key_signature_size+" should be no less than 0.");
+      document.getElementById("lsh_table_key_signature_size").value = 10;
+      hash_table_key_signature_size = 10;
+    }
+    var hash_table_hash_bucket_fraction = document.getElementById("lsh_table_hash_bucket_fraction").value;
+    if(isNaN(hash_table_hash_bucket_fraction)){
+      alert("The bucket fraction="+hash_table_hash_bucket_fraction+" is invalid.");
+      console.log("The bucket fraction is invalid: "+hash_table_hash_bucket_fraction);
+      document.getElementById("lsh_table_hash_bucket_fraction").value = 1;
+      hash_table_hash_bucket_fraction = 10;
+    }
+    hash_table_hash_bucket_fraction = parseFloat(hash_table_hash_bucket_fraction);
+    if(hash_table_hash_bucket_fraction <= 0 || hash_table_hash_bucket_fraction > 1){
+      alert("The bucket fraction="+hash_table_hash_bucket_fraction+" should be in the range (0, 1].");
+      document.getElementById("lsh_table_hash_bucket_fraction").value = 1;
+      hash_table_hash_bucket_fraction = 1;
     }
     scenario1();
 
@@ -302,9 +327,8 @@ function re_run(e) {
       alert("Design Continuum's Level="+design_continuum_L+" is invalid.")
       console.log("Design Continuum's Level is invalid: "+design_continuum_L);
       document.getElementById("design_continuum_L").value = 6;
-      design_continuum_L = 6;
+      design_continuum_L = 7;
     }
-
 
 
     var design_continuum_T = document.getElementById("design_continuum_T").value;
