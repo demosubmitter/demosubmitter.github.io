@@ -1741,7 +1741,7 @@ function draw_cost(prefix="lsh_table"){
 	];
 
 	var coefficient_array = workload.getCoefficientArray();
-
+	var r = coefficient_array[3];
 	var text_array = [
 		"Update",
 		"Range Lookup",
@@ -1833,7 +1833,13 @@ function draw_cost(prefix="lsh_table"){
 		span_tmp.setAttribute("data-tooltip-position","bottom")
 		p_tmp.setAttribute("style","text-align: center;font-weight:bold;font-size:18px")
 		span_tmp.appendChild(p_tmp);
-		div_throughput.appendChild(span_tmp)
+		div_throughput.appendChild(span_tmp);
+
+		if(r <= 0.0){
+      document.getElementById(prefix+"_zero_result_lookup").style.display='none';
+    }else{
+      document.getElementById(prefix+"_zero_result_lookup").style.display='';
+    }
 		return cost_array;
 }
 
