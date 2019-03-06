@@ -219,7 +219,9 @@ function getTotalUpdateCost(i, initCapacity, E, L, filter_array, N, T, B, Y, K, 
 	for(j = 1; j <= L; j++){
 		total += getLeveledUpdateCost(j, initCapacity, E, L, filter_array, N, T, B, Y, K, Z, s, Mu, isOptimalFPR, leveltier, LLBushK, LLBushT, key_size, mfence_pointer_per_entry);
 	}
-	return total;
+	var gc_overhead = 0;
+	if(Z > 1) gc_overhead = 1;
+	return total + gc_overhead/(B*Mu);
 
 }
 
@@ -1231,6 +1233,9 @@ function draw_lsm_graph(prefix) {
 		var filters;
 		var maxN = (Z + 1.0/T)*N;
 		var tmpN = N + obsolete_coefficient*(maxN - N);
+		if(prefix != "lsm_tree"){
+			tmpN = Math.min(tmpN, 2*N);
+		}
 		var L = Math.log(tmpN*E*(T - 1)/mbuffer+ 1)/Math.log(T) - 1;
 		var levels_with_Z_runs = 0;
 		var Y = 0;
@@ -2973,14 +2978,14 @@ function getLSMTreeT(lsm_tree_type, prefix="lsm_tree"){
 	var Tmax = Math.pow(N*Z/(mbuffer/E), 1/L);
 	var tmpT;
 	var amp = function(x){return 1;};
-	if(lsm_tree_type == 0){
-		amp = function(x){return Math.floor(x)-1;}
-	}else if(lsm_tree_type == 3){
-		amp = function(x){return Z-1;}
+	if(prefix == "design_continuum"){
+		adaptionF = function(x){return Math.min(x, 2*N);}
+	}else{
+		adaptionF = function(x){return x;}
 	}
 	while(Tmax - Tmin > 1e-8){
 		tmpT = (Tmin + Tmax)/2;
-		tmpN = N*(1 + obsolete_coefficient*(Z + 1/tmpT - 1));
+		tmpN = adaptionF(N*(1 + obsolete_coefficient*(Z + 1/tmpT - 1)));
 		tmpL = Math.log(tmpN*E*(tmpT - 1)/mbuffer+ 1)/Math.log(tmpT)-1;
 		if(tmpL < L){
 			Tmax = tmpT;
@@ -2990,8 +2995,8 @@ function getLSMTreeT(lsm_tree_type, prefix="lsm_tree"){
 			break;
 		}
 	}
-	tmpT = Tmin;
-	tmpN = N*(1 + obsolete_coefficient*(Z + 1/tmpT - 1));
+	tmpT = Tmax;
+	tmpN = adaptionF(N*(1 + obsolete_coefficient*(Z + 1/tmpT - 1)));
 	var maxL = Math.log(tmpN*E*(tmpT - 1)/mbuffer/tmpT+ 1/tmpT)/Math.log(tmpT);
 	if(Math.abs(Math.round(maxL) - maxL) < 1e-6){
 		maxL = Math.round(maxL);

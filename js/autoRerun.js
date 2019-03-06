@@ -1,7 +1,7 @@
 var timer=null;
 
 function update_lsm_tree(id, lsm_tree_type, lsm_tree_L, lsm_tree_T, lsm_tree_mbuffer, N, E, obsolete_coefficient){
-  if(id == 'lsm_tree_L' || id == 'UI-ratio' || id == 'lsm_tree_Z'){
+  if(id == 'lsm_tree_L' || id == 'obsolete_coefficient' || id == 'lsm_tree_Z'){
     var result = getLSMTreeT(lsm_tree_type);
     var T = result[0];
     var maxL = result[1];
@@ -15,37 +15,39 @@ function update_lsm_tree(id, lsm_tree_type, lsm_tree_L, lsm_tree_T, lsm_tree_mbu
     document.getElementById("lsm_tree_T").value=T;
 
 
-  }else if(id.startsWith('lsm_tree') || id == 'N' || id == "E" || id == "Key-Size" || id == "P" || id == "UI-ratio"){
-    var L;
-    if(lsm_tree_type == 0){
-      L = Math.log(N*Math.floor(lsm_tree_T-1)*E/lsm_tree_mbuffer)/Math.log(lsm_tree_T);
-    }else{
-      L = Math.log(N*E/lsm_tree_mbuffer)/Math.log(lsm_tree_T);
-    }
-
-    if(Math.abs(L - Math.round(L))<1e-6){
-      L = Math.round(L);
-    }else{
-      L = Math.ceil(L);
-    }
-    var tmpN;
-    if(lsm_tree_type == 0){
-      tmpN = obsolete_coefficient*((1 - 1/Math.pow(lsm_tree_T, L))/(1 - 1/lsm_tree_T)*N*(Math.floor(lsm_tree_T)-1) + lsm_tree_mbuffer/E - N)+N;
-    }else{
-      tmpN = obsolete_coefficient*((1 - 1/Math.pow(lsm_tree_T, L))/(1 - 1/lsm_tree_T)*N + lsm_tree_mbuffer/E - N) + N;
-    }
-    L = Math.log(tmpN*E*(lsm_tree_T-1)/lsm_tree_mbuffer+1)/Math.log(lsm_tree_T)-1;
-    if(Math.abs(L - Math.round(L))<1e-6){
-      L = Math.round(L);
-    }else{
-      L = Math.ceil(L);
-    }
-
-    if(L < 0){
-      L = 0;
-    }
-    document.getElementById("lsm_tree_L").value=L;
   }
+
+  // else if(id.startsWith('lsm_tree') || id == 'N' || id == "E" || id == "Key-Size" || id == "P"){
+  //   var L;
+  //   if(lsm_tree_type == 0){
+  //     L = Math.log(N*Math.floor(lsm_tree_T-1)*E/lsm_tree_mbuffer)/Math.log(lsm_tree_T);
+  //   }else{
+  //     L = Math.log(N*E/lsm_tree_mbuffer)/Math.log(lsm_tree_T);
+  //   }
+  //
+  //   if(Math.abs(L - Math.round(L))<1e-6){
+  //     L = Math.round(L);
+  //   }else{
+  //     L = Math.ceil(L);
+  //   }
+  //   var tmpN;
+  //   if(lsm_tree_type == 0){
+  //     tmpN = obsolete_coefficient*((1 - 1/Math.pow(lsm_tree_T, L))/(1 - 1/lsm_tree_T)*N*(Math.floor(lsm_tree_T)-1) + lsm_tree_mbuffer/E - N)+N;
+  //   }else{
+  //     tmpN = obsolete_coefficient*((1 - 1/Math.pow(lsm_tree_T, L))/(1 - 1/lsm_tree_T)*N + lsm_tree_mbuffer/E - N) + N;
+  //   }
+  //   L = Math.log(tmpN*E*(lsm_tree_T-1)/lsm_tree_mbuffer+1)/Math.log(lsm_tree_T)-1;
+  //   if(Math.abs(L - Math.round(L))<1e-6){
+  //     L = Math.round(L);
+  //   }else{
+  //     L = Math.ceil(L);
+  //   }
+  //
+  //   if(L < 0){
+  //     L = 0;
+  //   }
+  //   document.getElementById("lsm_tree_L").value=L;
+  // }
 
   	draw_lsm_graph("lsm_tree");
 }
@@ -361,7 +363,7 @@ function re_run(e) {
         design_continuum_D = 1;
     }
 
-    if(event.target.id == "design_continuum_L"){
+    if(event.target.id == "design_continuum_L" || event.target.id == "design_continuum_Z" || event.target.id == "N"){
       var design_continuum_T = getLSMTreeT(3, "design_continuum")[0];
       if(design_continuum_T <= 2){
         document.getElementById("design_continuum_T").value = 2;
