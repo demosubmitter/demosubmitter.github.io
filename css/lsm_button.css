@@ -1,5 +1,5 @@
 .form-control {
-  height: 40px;
+  height: 30px;
   padding: 10px 15px;
   font-size: 15px;
   line-height: 1.42857143;
@@ -20,14 +20,16 @@
     text-align: center;
     background-color: #ecf0f1;
     border: 1px solid #dce4ec;
+    height:30px;
 }
 
 .input-group {
     position: relative;
     display: table;
     border-collapse: separate;
-    height:40px;
-    margin:5px;
+    margin:3px;
+    padding: 3px;
+    height:30px;
 }
 
 .lsm_button {

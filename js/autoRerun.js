@@ -209,7 +209,7 @@ function re_run(e) {
       lsm_tree_L = L;
     }
     lsm_tree_L = parseInt(L);
-    if(lsm_tree_L < 0){
+    if(lsm_tree_L < 1){
       alert("Level="+lsm_tree_L+" is too small in LSM-Tree.");
       document.getElementById("lsm_tree_L").value = 6;
       lsm_tree_L = 6;
@@ -242,39 +242,27 @@ function re_run(e) {
         alert("Size Ratio="+lsm_tree_T+" is too small in LSM-Tree.");
         document.getElementById("lsm_tree_T").value = 2;
         lsm_tree_T = 2;
-    }else if(lsm_tree_T > P/E){
-      alert("Size Ratio="+lsm_tree_T+" is too large in LSM-Tree.");
-      document.getElementById("lsm_tree_T").value = P/E;
-      lsm_tree_T = P/E;
     }
+    // else if(lsm_tree_T > P/E){
+    //   alert("Size Ratio="+lsm_tree_T+" is too large in LSM-Tree.");
+    //   document.getElementById("lsm_tree_T").value = P/E;
+    //   lsm_tree_T = P/E;
+    // }
     var lsm_tree_type=getBoldButtonByName("lsm_tree_type");
     update_lsm_tree(event.target.id, lsm_tree_type, lsm_tree_L, lsm_tree_T, lsm_tree_mbuffer, N, E, obsolete_coefficient);
 
     //B_epsilon tree
-    var fanout = document.getElementById("B_epsilon_tree_fanout").value;
-    if(isNaN(fanout)){
-      alert("Facnout ="+fanout+" is invalid.")
-      console.log("Fanout is invalid: "+fanout);
-      var H = parseInt(document.getElementById("B_epsilon_tree_height").value);
-      if(H > 1){
-        fanout = Math.floor(Math.pow((N+1)/2, 1/(H-1))*2);
-      }else{
-        fanout = Math.ceil(N/(P/E));
-      }
-      document.getElementById("B_epsilon_tree_fanout").value = fanout;
+    var level = document.getElementById("B_epsilon_tree_level").value;
+    if(isNaN(level)){
+      alert("Level ="+level+" is invalid.")
+      console.log("Level is invalid: "+level);
+      level = 10;
     }
-    if (fanout<2){
-
-        alert("Fanout="+fanout+" is too small in B Tree.");
-        document.getElementById("B_epsilon_tree_fanout").value = 2;
-        fanout = 2;
+    if (level<1){
+        alert("Level="+level+" is too small in B Tree.");
+        level = 10;
     }
-    var t = 2;
-  	if(fanout != 2){
-  		t = Math.ceil(fanout/2)
-  	}
-    var H = Math.log((N+1)/2)/Math.log(t)+1;
-    document.getElementById("B_epsilon_tree_height").value = H;
+    document.getElementById("B_epsilon_tree_level").value = level;
 
     scenario3();
 
@@ -367,8 +355,19 @@ function re_run(e) {
       var design_continuum_T = getLSMTreeT(3, "design_continuum")[0];
       if(design_continuum_T <= 2){
         document.getElementById("design_continuum_T").value = 2;
+        design_continuum_T = 2;
       }else{
         document.getElementById("design_continuum_T").value = design_continuum_T;
+      }
+      max_partitions = Math.floor(design_continuum_T) - 1;
+      if(design_continuum_K > max_partitions){
+        alert("Hot Merge Threshold changes into " + max_partitions + " automatically.");
+        document.getElementById("design_continuum_K").value = max_partitions;
+      }
+
+      if(design_continuum_Z > max_partitions){
+        alert("Cold Merge Threshold changes into " + max_partitions + " automatically.");
+        document.getElementById("design_continuum_Z").value = max_partitions;
       }
 
     }

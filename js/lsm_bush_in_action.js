@@ -82,7 +82,7 @@ function parseInputTextBoxes(prefix="lsm_tree")
 			}
 
 		}else if(prefix == "B_epsilon_tree"){
-			parsedBoxes.fanout = parseInt(document.getElementById("B_epsilon_tree_fanout").value);
+			parsedBoxes.level = parseInt(document.getElementById("B_epsilon_tree_level").value);
 		}else if(prefix == "lsh_table"){
 			parsedBoxes.hash_table_gc_threshold = parseFloat(document.getElementById("lsh_table_gc_threshold").value);
 			parsedBoxes.hash_table_key_signature_size = parseInt(document.getElementById("lsh_table_key_signature_size").value);
@@ -151,20 +151,17 @@ function B_EPSILON_Tree(inputParameters){
 	this.obsolete_coefficient = inputParameters.obsolete_coefficient;
 	this.B = this.P/this.E;
 	this.s = inputParameters.s;
-	this.fanout = inputParameters.fanout;
+	this.level = inputParameters.level;
 }
 
 B_EPSILON_Tree.prototype.getCostArray = function(){
 	var t = 2;
-	if(this.fanout != 2){
-		t = Math.ceil(this.fanout/2)
-	}
-	var H = Math.log((this.N+1)/2)/Math.log(t)+1;
+	var fanout = 2*Math.pow((this.N+1)/2, 1/(this.level+1));
 	return [
-		this.fanout*H/this.B,
+		fanout*this.level/this.B,
 		this.s/this.B,
-		H,
-		H,
+		this.level,
+		this.level,
 		this.mbuffer*8,
 		2*this.N*this.E*8
 	];
@@ -277,7 +274,7 @@ function getLeveledExistingPointLookupCost(i, initCapacity, E, L, filter_array, 
 		Z = 1;
 	}
 
-	var EULER = 2.71828182845904523536;
+	var EULER = 2.71822182245904523536;
 	var result;
 	result = calc_R(filter_array[i - 1]);
 	if(i < L-Y){
@@ -941,14 +938,14 @@ function initScenario2(){
 	document.getElementById("lsm_tree_L").value=6;
 	document.getElementById("lsm_tree_T").value=10;
 	document.getElementsByName("lsm_tree_type")[0].style.fontWeight='bold';
+	document.getElementsByName("lsm_tree_type")[0].style.fontSize='16px';
 
 	scenario2();
 }
 
 function initScenario3(){
 	//B-epsilon-tree
-	document.getElementById("B_epsilon_tree_fanout").value=10;
-	document.getElementById("B_epsilon_tree_height").value=17;
+	document.getElementById("B_epsilon_tree_level").value=10;
 	document.getElementById("B_epsilon_tree_mbuffer").value=2;
 
 	scenario3();
@@ -960,7 +957,7 @@ function initScenario4(){
 	document.getElementById("design_continuum_memory_budget").value=2; //0 bits per element
 	document.getElementById("design_continuum_L").value=7;
 	document.getElementById("design_continuum_K").value=3;
-	document.getElementById("design_continuum_Z").value=2;
+	document.getElementById("design_continuum_Z").value=1;
 	document.getElementById("design_continuum_T").value=7;
 	document.getElementById("design_continuum_D").value=10;
 
@@ -970,7 +967,7 @@ function initScenario4(){
 function init(){
 	// Dataset and Environment
     document.getElementById("N").value=numberWithCommas(68719476736); //(10M values)
-    document.getElementById("E").value=16;
+    document.getElementById("E").value=20;
 		document.getElementById("P").value=4096; //in B
 		document.getElementById("Key-Size").value=8;
 		document.getElementById("read-latency").value = 20;
@@ -1003,6 +1000,7 @@ function scenario1()
 	var inputParameters = parseInputTextBoxes("lsh_table");
 	var E = inputParameters.E;
 	var N = inputParameters.N;
+	var P = inputParameters.P;
 	var obsolete_coefficient = inputParameters.obsolete_coefficient;
 	var key_size = inputParameters.key_size;
 	var hash_table_gc_threshold=inputParameters.hash_table_gc_threshold;
@@ -1018,11 +1016,9 @@ function scenario1()
 		var div_row1=document.createElement("div");
 		div_row1.setAttribute("class","col-sm-12")
 		div_row1.setAttribute("style","text-align: center;height:70px;");
-		var div_col0 = document.createElement("div");
-		div_col0.setAttribute("class","col-sm-4");
-		div_row1.appendChild(div_col0);
+
 		var div_col1 = document.createElement("div");
-		div_col1.setAttribute("class","col-sm-4 center");
+		div_col1.setAttribute("class","col-sm-6 center");
 		var hash_table_img = document.createElement("img");
 		hash_table_img.setAttribute("class","img-responsive img-centered")
 		hash_table_img.setAttribute("style","width:60px;");
@@ -1031,37 +1027,40 @@ function scenario1()
 		div_col1.setAttribute("data-tooltip","The hash table contains all unique keys and takes up " + formatBytes(cost_array[4]/8, 1) + ".");
 		div_col1.setAttribute("data-tooltip-position","top");
 		div_row1.appendChild(div_col1);
-		// var div_col2 = document.createElement("div");
-		// div_col2.setAttribute("class","col-sm-4");
-		// var buffer_img = document.createElement("img");
-		// buffer_img.setAttribute("class","img-responsive img-centered")
-		// buffer_img.setAttribute("style","width:60px;");
-		// buffer_img.src='./images/buffer.png';
-		// div_col2.appendChild(buffer_img);
-		// div_col2.setAttribute("data-tooltip","The buffer takes up " + formatBytes(mbuffer, 1) + ".");
-		// div_col2.setAttribute("data-tooltip-position","top");
-		// div_row1.appendChild(div_col2);
+		var div_col2 = document.createElement("div");
+		div_col2.setAttribute("class","col-sm-6");
+		var buffer_img = document.createElement("img");
+		buffer_img.setAttribute("class","img-responsive img-centered")
+		buffer_img.setAttribute("style","width:60px;");
+		buffer_img.src='./images/buffer.png';
+		div_col2.appendChild(buffer_img);
+		div_col2.setAttribute("data-tooltip","The buffer takes up " + formatBytes(P, 1) + ".");
+		div_col2.setAttribute("data-tooltip-position","top");
+		div_row1.appendChild(div_col2);
 
 		var div_row2=document.createElement("div");
 		div_row2.setAttribute("class","col-sm-12")
-		div_row2.setAttribute("style","text-align: center;height:38px");
+		div_row2.setAttribute("style","text-align: center;height:22px");
 		message = "LSM-Table maintains an in-memory hash table that maps from each key to its corresponding entry in the log, which contains " + numberWithCommas(tmpN) + " entries."
 		div_row2.setAttribute("data-tooltip", message);
 		div_row2.setAttribute("data-tooltip-position", "bottom");
 
-		var button=document.createElement("button");
-		button.setAttribute("class","lsm_button");
-		button.setAttribute("style","width: 75%; height: 36px");
-		div_row2.appendChild(button);
+		for(var i = 0; i <= 4; i++){
+			var button=document.createElement("button");
+			button.setAttribute("class","lsm_button");
+			button.setAttribute("style","width: 15%; height: 20px");
+			div_row2.appendChild(button);
+		}
+
 
 		var span =document.createElement("span");
-		span.setAttribute("style", "width:8%; font-size: 20px; color: #a51c30; padding: 0px 2px");
+		span.setAttribute("style", "width:10%; font-size: 20px; color: #a51c30; padding: 0px 2px");
 		span.textContent=" ...";
 		div_row2.appendChild(span);
 
 		var button=document.createElement("button");
 		button.setAttribute("class","lsm_button");
-		button.setAttribute("style","width: 17%; height: 36px");
+		button.setAttribute("style","width: 15%; height: 20px");
 		div_row2.appendChild(button);
 
 
@@ -1089,19 +1088,15 @@ function scenario3(){
 	var inputParameters = parseInputTextBoxes();
 	var N = inputParameters.N;
 	var mbuffer = parseFloat(document.getElementById("B_epsilon_tree_mbuffer").value.replace(/\D/g,''))*1048576;
-	var fanout = parseInt(document.getElementById("B_epsilon_tree_fanout").value);
-	var t = 2;
-	if(fanout != 2){
-		t = Math.ceil(fanout/2)
-	}
-	var H = Math.log((N+1)/2)/Math.log(t)+1;
-	document.getElementById("B_epsilon_tree_height").value = Math.ceil(H);
+	var H = parseInt(document.getElementById("B_epsilon_tree_level").value);
+	var fanout = 2*Math.pow((N+1)/2, 1/(H-1));
+	document.getElementById("B_epsilon_tree_level").value = Math.ceil(H);
 
 		var result_div=document.getElementById("B_epsilon_tree_result");
 		removeAllChildren(result_div);
 
 		var div_row1=document.createElement("div");
-		div_row1.setAttribute("class","col-sm-12")
+		div_row1.setAttribute("class","row")
 		div_row1.setAttribute("style","text-align: center;height:70px;")
 		var div_col1 = document.createElement("div");
 		div_col1.setAttribute("class","col-sm-4");
@@ -1124,34 +1119,34 @@ function scenario3(){
 		{
 				max_button_size=Math.max(screen.width-700,350);
 		}
-		var B_epsilon_tree_size_ratio=(max_button_size-70)/H;
+		var B_epsilon_tree_size_ratio=(max_button_size-70)/(H+1);
 		var cur_length=70;
 
-		for(var i = 1; i <= H;i++){
+		for(var i = 1; i <= H; i++){
 
 			var div_new_row=document.createElement("div");
 			div_new_row.setAttribute("class","row");
 			var div_lsm_runs=document.createElement("div");
-			div_lsm_runs.setAttribute("style","text-align: center;height:38px;");
+			div_lsm_runs.setAttribute("style","text-align: center;height:22px;");
 			div_new_row.appendChild(div_lsm_runs);
 
 			var button=document.createElement("button");
 			button.setAttribute("class","lsm_button");
 			cur_length+=B_epsilon_tree_size_ratio;
 			button.setAttribute("class","lsm_button");
-			button.setAttribute("style","width: "+cur_length+"px; height: 36px");
+			button.setAttribute("style","width: "+cur_length+"px; height: 20px");
 
 			div_lsm_runs.appendChild(button);
 			result_div.appendChild(div_new_row);
 
-			if(i > 1 && i < H-1){
+			if(i >= 1 && i < H){
 				var div_new_row=document.createElement("div");
 				div_new_row.setAttribute("class","row");
 				var margin_left = (max_width-cur_length+B_epsilon_tree_size_ratio)/2;
 				div_new_row.setAttribute("style","text-align: center;font-weight:bold;margin-top:-20px;width:100%;z-index:2;position:absolute");
 				var div_lsm_runs=document.createElement("div");
 				div_lsm_runs.setAttribute("style","text-align: center;height:25px;width:"+cur_length+"px;margin:auto auto");
-				var tmp = Math.ceil((i-1)/4);
+				var tmp = Math.ceil((i)/4);
 				var length_percent = 100/(2*tmp+1);
 				for(j = 1; j <= tmp; j++){
 					var div_col = document.createElement("div");
@@ -1179,6 +1174,7 @@ function scenario3(){
 
 				result_div.appendChild(div_new_row);
 			}
+
 		}
 
 
@@ -1232,17 +1228,15 @@ function draw_lsm_graph(prefix) {
 
 		var filters;
 		var maxN = (Z + 1.0/T)*N;
-		var tmpN = N + obsolete_coefficient*(maxN - N);
-		if(prefix != "lsm_tree"){
-			tmpN = Math.min(tmpN, 2*N);
-		}
+		var tmpN = Math.min(N + obsolete_coefficient*(maxN - N), 2*N);
+
 		var L = Math.log(tmpN*E*(T - 1)/mbuffer+ 1)/Math.log(T) - 1;
 		var levels_with_Z_runs = 0;
 		var Y = 0;
 		var mfence_pointer;
 		var mfilter;
 		if(prefix != "lsm_tree"){
-			var EULER = 2.71828182845904523536;
+			var EULER = 2.71822182245904523536;
 			var X = Math.pow(Math.log(EULER)/Math.log(2), 2)*(Math.log(T)/Math.log(EULER)/(T-1) + Math.log(K/Z)/Math.log(EULER)/T)/8;
 			var cold_level_approximation = Math.log(tmpN/MF*(X/T+key_size/B)*T/(T-1))/Math.log(T);
 			Y = Math.max(Math.ceil(cold_level_approximation), 0);
@@ -1431,7 +1425,7 @@ function draw_lsm_graph(prefix) {
 			div_new_row.setAttribute("class","row");
 
 			var div_lsm_runs=document.createElement("div");
-			div_lsm_runs.setAttribute("style","text-align: center;height:38px");
+			div_lsm_runs.setAttribute("style","text-align: center;height:22px");
 			div_new_row.appendChild(div_lsm_runs);
 
 			var levelcss=i+1;
@@ -1442,7 +1436,7 @@ function draw_lsm_graph(prefix) {
 							if (i >= filters.length-Y-1) {
 								maxRuns = Z;
 								n = Math.min(Z, 7);
-								if(prefix == "design_continuum"){
+								if(prefix == "design_continuum" && L != 1){
 									// draw arrows
 									var div_tmp_row=document.createElement("div");
 									div_tmp_row.setAttribute("class","row");
@@ -1492,7 +1486,7 @@ function draw_lsm_graph(prefix) {
 												var message="This level contains "+maxRuns+" runs";
 												span.setAttribute("data-tooltip", message);
 												span.setAttribute("data-tooltip-position", "left");
-												span.setAttribute("style", "width:19.27px; font-size: 20px; color: #a51c30; padding: 0px 2px");
+												span.setAttribute("style", "width:19.27px; font-size: 20px; color: #a51c30;");
 												span.id = i + "span";
 												span.textContent=" ...";
 												div_lsm_runs.appendChild(span);
@@ -1522,9 +1516,9 @@ function draw_lsm_graph(prefix) {
 
 
 										if(maxRuns >= 7){
-											button.setAttribute("style","width: "+(cur_length- 19.27)/6+"px; height: 36px");
+											button.setAttribute("style","width: "+(cur_length- 19.27)/6+"px; height: 20px");
 										}else{
-											button.setAttribute("style","width: "+cur_length/n+"px; height: 36px");
+											button.setAttribute("style","width: "+cur_length/n+"px; height: 20px");
 										}
 										var message="";
 										if(leveltier >= 4){
@@ -2466,7 +2460,7 @@ function get_R_uniform_strategy(M, T, N, K, Z, B, P, leveltier) {
 
     var exponent = (M / N) * Math.log(2) * Math.log(2) * T_part;
 
-    var EULER = 2.71828182845904523536;
+    var EULER = 2.71822182245904523536;
     var bottom = Math.pow(EULER, exponent);
     var R = 1.0 / bottom;
 		if(L < 1){
@@ -2975,17 +2969,24 @@ function getLSMTreeT(lsm_tree_type, prefix="lsm_tree"){
 	var mbuffer = inputParameters.mbuffer;
 	var tmpN;
 	var Tmin = 2;
-	var Tmax = Math.pow(N*Z/(mbuffer/E), 1/L);
-	var tmpT;
-	var amp = function(x){return 1;};
+	var Tmax;
 	if(prefix == "design_continuum"){
-		adaptionF = function(x){return Math.min(x, 2*N);}
+		Tmax = Math.pow(N*Z/(mbuffer/E), 1/L);
+	}else if(L != 1){
+		Tmax = Math.pow(N/(mbuffer/E), 1/(L-1));
 	}else{
-		adaptionF = function(x){return x;}
+		Tmax = 2*N/(mbuffer/E);
 	}
+	var tmpT;
+	var	adaptionF = function(x){return Math.min(x, 2*N);}
 	while(Tmax - Tmin > 1e-8){
 		tmpT = (Tmin + Tmax)/2;
-		tmpN = adaptionF(N*(1 + obsolete_coefficient*(Z + 1/tmpT - 1)));
+		if(lsm_tree_type != 0){
+			tmpN = adaptionF(N*(1 + obsolete_coefficient*(Z + 1/tmpT - 1)));
+		}else{
+			tmpN = adaptionF(N*(1 + obsolete_coefficient*(tmpT + 1/tmpT - 2)));
+		}
+
 		tmpL = Math.log(tmpN*E*(tmpT - 1)/mbuffer+ 1)/Math.log(tmpT)-1;
 		if(tmpL < L){
 			Tmax = tmpT;
@@ -2996,7 +2997,11 @@ function getLSMTreeT(lsm_tree_type, prefix="lsm_tree"){
 		}
 	}
 	tmpT = Tmax;
-	tmpN = adaptionF(N*(1 + obsolete_coefficient*(Z + 1/tmpT - 1)));
+	if(lsm_tree_type != 0){
+		tmpN = adaptionF(N*(1 + obsolete_coefficient*(Z + 1/tmpT - 1)));
+	}else{
+		tmpN = adaptionF(N*(1 + obsolete_coefficient*(tmpT + 1/tmpT - 2)));
+	}
 	var maxL = Math.log(tmpN*E*(tmpT - 1)/mbuffer/tmpT+ 1/tmpT)/Math.log(tmpT);
 	if(Math.abs(Math.round(maxL) - maxL) < 1e-6){
 		maxL = Math.round(maxL);
