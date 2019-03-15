@@ -163,7 +163,7 @@ B_EPSILON_Tree.prototype.getCostArray = function(){
 		this.level,
 		this.level,
 		this.mbuffer*8,
-		2*this.N*this.E*8
+		(1+1.0/fanout)*this.N*this.E*8
 	];
 }
 
@@ -936,7 +936,7 @@ function initScenario2(){
 	//document.getElementById("lsm_tree_T").readOnly=true;
 	document.getElementById("lsm_tree_filters_memory_budget").value=2; //0 bits per element
 	document.getElementById("lsm_tree_L").value=6;
-	document.getElementById("lsm_tree_T").value=10;
+	document.getElementById("lsm_tree_T").value=9.1836;
 	document.getElementsByName("lsm_tree_type")[0].style.fontWeight='bold';
 	document.getElementsByName("lsm_tree_type")[0].style.fontSize='16px';
 
@@ -958,7 +958,7 @@ function initScenario4(){
 	document.getElementById("design_continuum_L").value=7;
 	document.getElementById("design_continuum_K").value=3;
 	document.getElementById("design_continuum_Z").value=1;
-	document.getElementById("design_continuum_T").value=7;
+	document.getElementById("design_continuum_T").value=6.6544;
 	document.getElementById("design_continuum_D").value=10;
 
 	scenario4();
@@ -978,8 +978,8 @@ function init(){
 	document.getElementById("obsolete_coefficient").value = 0.25;
 	document.getElementById("w").value = 0.5;
 	document.getElementById("r").value = 0.0;
-	document.getElementById("v").value = 0.499999;
-	document.getElementById("qL").value = 0.000001;
+	document.getElementById("v").value = 0.49999;
+	document.getElementById("qL").value = 0.00001;
 	//document.getElementById("X").value = numberWithCommas(0);
 
 	//buttons:
@@ -1089,7 +1089,8 @@ function scenario3(){
 	var N = inputParameters.N;
 	var mbuffer = parseFloat(document.getElementById("B_epsilon_tree_mbuffer").value.replace(/\D/g,''))*1048576;
 	var H = parseInt(document.getElementById("B_epsilon_tree_level").value);
-	var fanout = 2*Math.pow((N+1)/2, 1/(H-1));
+	var fanout = Math.round(2*Math.pow((N+1)/2, 1/(H-1)));
+	document.getElementById("B_epsilon_tree_title").setAttribute("data-tooltip","B " + unescape('%u03B5') + "-tree with the fanout of " + fanout);
 	document.getElementById("B_epsilon_tree_level").value = Math.ceil(H);
 
 		var result_div=document.getElementById("B_epsilon_tree_result");
@@ -1257,8 +1258,12 @@ function draw_lsm_graph(prefix) {
 		var mfilter_per_entry = mfilter/tmpN;
 		var tmp_mfilter_bits = mfilter*8;
 
-
-
+		if(prefix == "design_continuum"){
+			title = "Design Continuum"
+		}else{
+			title = "LSM-Tree"
+		}
+			document.getElementById(prefix+"_title").setAttribute("data-tooltip",title + " with the size ratio of " + T.toFixed(4));
 			document.getElementById(prefix+"_L").value = Math.ceil(L);
 
 	    //get BF allocation
@@ -1436,7 +1441,7 @@ function draw_lsm_graph(prefix) {
 							if (i >= filters.length-Y-1) {
 								maxRuns = Z;
 								n = Math.min(Z, 7);
-								if(prefix == "design_continuum" && L != 1){
+								if(prefix == "design_continuum" && L != 1 && i >= filters.length-Y && Y != 0){
 									// draw arrows
 									var div_tmp_row=document.createElement("div");
 									div_tmp_row.setAttribute("class","row");
@@ -3051,39 +3056,45 @@ function MergeByLSMBush(lsm_bush_type){
 }
 
 function showStorageDevice(){
+	hideDataset();
+	hideWorkload();
+	document.getElementById("storage-text").style.fontWeight='bold';
 	document.getElementById('storage-device-trigger').onclick=function(){hideStorageDevice();}
-	document.getElementById('storage-device-trigger').setAttribute('data-tooltip','click here to hide the SSD default settings');
 	document.getElementById("storage-device-setting").style.display='';
 }
 
 function hideStorageDevice(){
+	document.getElementById("storage-text").style.fontWeight='';
 	document.getElementById('storage-device-trigger').onclick=function(){showStorageDevice();}
-	document.getElementById('storage-device-trigger').setAttribute('data-tooltip','click here to edit the SSD default settings');
 	document.getElementById("storage-device-setting").style.display='none';
 
 }
 
 function showDataset(){
+	hideWorkload();
+	hideStorageDevice();
+	document.getElementById('data-text').style.fontWeight='bold';
 	document.getElementById('dataset-trigger').onclick=function(){hideDataset();}
-	document.getElementById('dataset-trigger').setAttribute('data-tooltip','click here to hide the default dataset');
 	document.getElementById("dataset-setting").style.display='';
 
 }
 
 function hideDataset(){
+	document.getElementById('data-text').style.fontWeight='';
 	document.getElementById('dataset-trigger').onclick=function(){showDataset();}
-	document.getElementById('dataset-trigger').setAttribute('data-tooltip','click here to edit the default dataset');
 	document.getElementById("dataset-setting").style.display='none';
 }
 
 function showWorkload(){
+	hideDataset();
+	hideStorageDevice();
+	document.getElementById('workload-text').style.fontWeight='bold';
 	document.getElementById('workload-trigger').onclick=function(){hideWorkload();}
-	document.getElementById('workload-trigger').setAttribute('data-tooltip','click here to hide the workload setting');
 	document.getElementById("workload-setting").style.display='';
 }
 
 function hideWorkload(){
+	document.getElementById('workload-text').style.fontWeight='';
 	document.getElementById('workload-trigger').onclick=function(){showWorkload();}
-	document.getElementById('workload-trigger').setAttribute('data-tooltip','click here to customize the workload');
 	document.getElementById("workload-setting").style.display='none';
 }

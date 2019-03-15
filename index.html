@@ -247,7 +247,7 @@
     </section> -->
 
     <section id="interactiveDemo">
-        <div class="container page-scroll" style="width:1350px">
+        <div class="container page-scroll" style="width:1350px;">
 
             <!-- <a href="#interactiveDemo" id="interactiveDemo"></a>  -->
 
@@ -255,113 +255,119 @@
             <!-- </div>  -->
 
             <div class="row" style="text-align: center">
-                <br>
-                <p>
-                Dataset: The dataset consists of <span id="data_size_text">1 TB</span> of data comprising unique <span id="E_text">16</span>-byte key-value pairs of <span id="key_size_text">8</span>-byte keys. To edit the default dataset, click <span id="dataset-trigger" data-tooltip="click here to edit the default dataset" data-tooltip-position="bottom" style="cursor:pointer;text-decoration:underline;" onclick="showDataset()"><b>here</b></span>.
-                </p>
-                <div id="dataset-setting" class="row" style="display:none">
-                  <div class="row">
-                    <div id="dataset-title" class="row" >
-                    <h4 style="text-align: center">Dataset</h4>
-
-                    </div>
+                <div class="col-sm-4">
+                  <img class="img-responsive img-centered" style="width:24%" src="./images/data.png"/>
+                  <br>
+                  <div id="dataset-trigger" onclick="showDataset()">
+                    <span style="cursor: pointer;font-size:25px" id="data-text" data-tooltip="The dataset consists of 1 TB of data comprising unique 16-byte key-value pairs of 8-byte keys" data-tooltip-position="bottom">
+                      data
+                    </span>
                   </div>
+                </div>
+
+                <div class="col-sm-4">
+                  <img class="img-responsive img-centered" style="width:24%" src="./images/workload.png"/>
+                  <br>
+                  <div id="workload-trigger" onclick="showWorkload()">
+                    <span style="cursor: pointer;font-size:25px" id="workload-text" data-tooltip="The workload consists of 50.000% writes, 49.999% point lookups, and 0.001% range lookups with  target range of 8192 entries" data-tooltip-position="bottom">workload</span>
+                  </div>
+                </div>
+
+                <div class="col-sm-4">
+                  <img class="img-responsive img-centered" style="width:24%" src="./images/storage.png"/>
+                  <br>
+                  <div id="storage-device-trigger" onclick="showStorageDevice()">
+                    <span style="cursor: pointer; font-size:25px" id="storage-text" data-tooltip="The storage device is an SSD with 4 KB blocks and for which reading a block takes 20 microseconds and writing a block takes 100 microseconds" data-tooltip-position="bottom">hardware</span>
+                  </div>
+                </div>
+
+
+
+                <div id="dataset-setting" class="row" style="display:none">
                   <div class="row">
                     <div class="col-sm-4">
                       <div class="input-group" >
                         <span class="input-group-addon"><span data-tooltip="Number of Entries in the Index (e.g., 10485760), which automatically changes the Level number" data-tooltip-position="bottom"> # Entries</span></span>
-                        <input id="N" type="text" class="form-control" aria-label="Index Size N (elements)" placeholder="Number of Entries in the Index (e.g., 10485760)" style="text-align:right" onchange="re_run(event, 'input1')"/>
+                        <input id="N" type="text" class="form-control" aria-label="Index Size N (elements)" placeholder="Number of Entries in the Index (e.g., 10485760)" style="text-align:right" onchange="re_run(event, 'dataset_input')"/>
                       </div>
                     </div>
                     <div class="col-sm-4">
                       <div class="input-group">
                         <span class="input-group-addon"><span data-tooltip="Key-Value pair size in bytes (e.g., 16)." data-tooltip-position="bottom"> Entry size (bytes)</span></span>
-                        <input id="E" type="number" class="form-control" aria-label="Key-Value pair size (bytes)" placeholder="Key-Value pair size in bytes (e.g., 16)" style="text-align:right" onchange="re_run(event, 'input2')" onwheel="re_run(event, 'input2')"  />
+                        <input id="E" type="number" class="form-control" aria-label="Key-Value pair size (bytes)" placeholder="Key-Value pair size in bytes (e.g., 16)" style="text-align:right" onchange="re_run(event, 'dataset_input')" onwheel="re_run(event, 'dataset_input')"  />
                       </div>
                     </div>
                     <div class="col-sm-4">
                       <div class="input-group">
                         <span class="input-group-addon"><span data-tooltip="Key size in bytes (e.g., 8)." data-tooltip-position="bottom"> Key size (bytes)</span></span>
-                        <input id="Key-Size" type="text" class="form-control" aria-label="Key size (bytes)" placeholder="Key size in bytes (e.g., 8)" style="text-align:right" onchange="re_run(event, 'input2')"/>
+                        <input id="Key-Size" type="text" class="form-control" aria-label="Key size (bytes)" placeholder="Key size in bytes (e.g., 8)" style="text-align:right" onchange="re_run(event, 'dataset_input')"/>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <p>
-                  Hardware: The storage device is an SSD with <span id="P_text">4 KB</span> blocks and for which reading a block takes <span id="read_latency_text">20</span> microseconds and writing a block takes <span id="write_latency_text">100</span> microseconds. To edit the SSD default settings, click <span data-tooltip="click here to edit the SSD default settings" data-tooltip-position="bottom" id="storage-device-trigger" style="cursor:pointer;text-decoration:underline;" onclick="showStorageDevice()"><b>here</b></span>.
-                </p>
                 <div id="storage-device-setting" class="row" style="display:none">
-                  <div class="row">
-                    <div id="storage-device-title" class="row">
-                        <h4 style="text-align: center">Storage Device</h4>
-                    </div>
-                  </div>
                   <div class="row">
                     <div class="col-sm-4">
                       <div class="input-group">
                         <span class="input-group-addon"><span data-tooltip="Block Size in bytes (e.g., 4096)." data-tooltip-position="bottom"> Block size (bytes)</span></span>
-                        <input id="P" type="number" class="form-control" aria-label="Block Size B (bytes)" placeholder="Block Size in bytes (e.g., 4096)" style="text-align:right" onchange="re_run(event, 'input3')" onwheel="re_run(event, 'input3')"/>
+                        <input id="P" type="number" class="form-control" aria-label="Block Size B (bytes)" placeholder="Block Size in bytes (e.g., 4096)" style="text-align:right" onchange="re_run(event, 'storage_input')" onwheel="re_run(event, 'storage_input')"/>
                       </div>
                     </div>
                     <div class="col-sm-4">
                       <div class="input-group">
                         <span class="input-group-addon"><span data-tooltip="Read Latency (microseconds)" data-tooltip-position="bottom"> Read Latency (&mu;s) </span></span>
-                        <input id="read-latency" type="text" class="form-control" aria-label="mu" placeholder="Read Latency (e.g., 20)" style="text-align:right" onchange="re_run(event, 'input3')" />
+                        <input id="read-latency" type="text" class="form-control" aria-label="mu" placeholder="Read Latency (e.g., 20)" style="text-align:right" onchange="re_run(event, 'storage_input')" />
                       </div>
                     </div>
                     <div class="col-sm-4">
                       <div class="input-group">
                         <span class="input-group-addon"><span data-tooltip="Write Latency (microseconds)" data-tooltip-position="bottom"> Write Latency (&mu;s) </span></span>
-                        <input id="write-latency" type="text" class="form-control" aria-label="mu" placeholder="Write Latency (e.g., 100)" style="text-align:right" onchange="re_run(event, 'input3')" />
+                        <input id="write-latency" type="text" class="form-control" aria-label="mu" placeholder="Write Latency (e.g., 100)" style="text-align:right" onchange="re_run(event, 'storage_input')" />
                       </div>
                     </div>
                   </div>
                 </div>
 
 
-                <p>
-                  Workload: The workload consists of <span id="write-prop-text">50.0000</span>% writes, <span id="point-lookup-prop-text">49.9999</span>% point lookups, and <span id="range-lookup-prop-text">0.0001</span>% range lookups with  target range of <span id="range-lookup-target-size-text">8192</span> entries.
-                  To edit the workload characteristics, click <span data-tooltip="click here to customize the workload" data-tooltip-position="bottom" id="workload-trigger" style="cursor:pointer;text-decoration:underline;" onclick="showWorkload()"><b>here</b></span>.
-                </p>
                 <div id="workload-setting" class="row" style="display:none">
-                  <div class="row">
+                  <!-- <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-4"> <h4>Writes</h4></div>
                     <div class="col-lg-4 col-md-4 col-sm-4"> <h4>Range Lookups</h4> </div>
                     <div class="col-lg-4 col-md-4 col-sm-4"> <h4>Point Lookups</h4> </div>
-                  </div>
+                  </div> -->
                   <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-4">
                       <div class="input-group">
                         <span class="input-group-addon"><span data-tooltip="Proportion of Write" data-tooltip-position="bottom"> Proportion of Write </span></span>
-                        <input id="w" type="text" class="form-control" aria-label="proportion of write operation" placeholder=" w (e.g., 1)"  style="text-align:right" onchange="re_run(event, 'input4')" onwheel="re_run(event, 'input4')" />
+                        <input id="w" type="text" class="form-control" aria-label="proportion of write operation" placeholder=" w (e.g., 1)"  style="text-align:right" onchange="re_run(event, 'input4')" onwheel="re_run(event, 'workload_input')" />
                       </div>
 
                       <div class="input-group">
                         <span class="input-group-addon"><span data-tooltip="Obsolescence Coefficient" data-tooltip-position="bottom"> Obsolescence Coefficient </span></span>
-                        <input id="obsolete_coefficient" type="text" class="form-control" aria-label="Obsolescence Coefficient" placeholder=" Obsolescence Coefficient (e.g., 0)"  style="text-align:right" onchange="re_run(event, 'input4')" onwheel="re_run(event, 'input4')" />
+                        <input id="obsolete_coefficient" type="text" class="form-control" aria-label="Obsolescence Coefficient" placeholder=" Obsolescence Coefficient (e.g., 0)"  style="text-align:right" onchange="re_run(event, 'workload_input')" onwheel="re_run(event, 'workload_input')" />
                       </div>
                     </div>
                     <div class="col-lg-4 col-md-4 col-sm-4">
                       <div class="input-group">
                         <span class="input-group-addon"><span data-tooltip="Proportion of Range Lookup Operation" data-tooltip-position="bottom"> Proportion of  Range Lookup  </span></span>
-                        <input id="qL" type="text" class="form-control" aria-label="proportion of range lookup operation" placeholder=" qL (e.g., 1)"  style="text-align:right" onchange="re_run(event, 'input4')" onwheel="re_run(event, 'input4')" />
+                        <input id="qL" type="text" class="form-control" aria-label="proportion of range lookup operation" placeholder=" qL (e.g., 1)"  style="text-align:right" onchange="re_run(event, 'workload_input')" onwheel="re_run(event, 'workload_input')" />
                       </div>
 
                       <div class="input-group">
                         <span class="input-group-addon"><span data-tooltip="The number of unique entries in the target key range" data-tooltip-position="bottom"> Target Range Size </span></span>
-                        <input id="s" type="number" class="form-control" aria-label="Proportion" placeholder=" s (e.g., 2048)"  style="text-align:right" onchange="re_run(event, 'input4')" onwheel="re_run(event, 'input4')"/>
+                        <input id="s" type="number" class="form-control" aria-label="Proportion" placeholder=" s (e.g., 2048)"  style="text-align:right" onchange="re_run(event, 'input4')" onwheel="re_run(event, 'workload_input')"/>
                       </div>
                     </div>
                     <div class="col-lg-4 col-md-4 col-sm-4">
                       <div class="input-group">
                         <span class="input-group-addon"><span data-tooltip="Proportion of Existig Point Lookup Operation" data-tooltip-position="bottom"> Proportion of Existig Point Lookup </span></span>
-                        <input id="v" type="text" class="form-control" aria-label="proportion of existing point lookup operation" placeholder=" v (e.g., 1)"  style="text-align:right" onchange="re_run(event, 'input4')" onwheel="re_run(event, 'input4')" />
+                        <input id="v" type="text" class="form-control" aria-label="proportion of existing point lookup operation" placeholder=" v (e.g., 1)"  style="text-align:right" onchange="re_run(event, 'workload_input')" onwheel="re_run(event, 'workload_input')" />
                       </div>
 
                       <div class="input-group">
                         <span class="input-group-addon"><span data-tooltip="Proportion of Non-result Point Lookup Operation" data-tooltip-position="bottom"> Proportion of Non-result Point Lookup </span></span>
-                        <input id="r" type="text" class="form-control" aria-label="proportion of non-result point lookup operation" placeholder=" r (e.g., 1)"  style="text-align:right" onchange="re_run(event, 'input4')" onwheel="re_run(event, 'input4')" />
+                        <input id="r" type="text" class="form-control" aria-label="proportion of non-result point lookup operation" placeholder=" r (e.g., 1)"  style="text-align:right" onchange="re_run(event, 'workload_input')" onwheel="re_run(event, 'workload_input')" />
                       </div>
                     </div>
                   </div>
@@ -372,9 +378,10 @@
 
             </div>
 
-
+            <br>
+            <br>
             <!-- Configuration for each architecture -->
-            <div class="row" style="margin:5px -15px">
+            <div class="row" style="margin:20px 0px">
                 <!-- LSH-Table -->
                 <div class="col-lg-3 col-md-3 col-sm-3">
                     <!-- <div class="input-group input-group-lg text-center">
@@ -383,7 +390,7 @@
                         </span>
                     </div> -->
                     <div class="row" style="text-align: center">
-                      <h4 data-tooltip="Log-Structured Hash-Table" data-tooltip-position="bottom" >LSH-Table</h4>
+                      <span style="font-size:24px" data-tooltip="Log-Structured Hash-Table" data-tooltip-position="bottom" >LSH-Table</span>
                     </div>
 
                     <div class="input-group">
@@ -419,7 +426,7 @@
                         </span>
                     </div> -->
                     <div class="row" style="text-align: center">
-                      <h4 data-tooltip="Log-Structured Merge-Tree" data-tooltip-position="bottom">LSM-Tree</h4>
+                      <span style="font-size:24px" id="lsm_tree_title" data-tooltip="Log-Structured Merge-Tree" data-tooltip-position="bottom">LSM-Tree</span>
                     </div>
 
                     <div id="LSM-Tree Merge Policy" class="input-group">
@@ -432,7 +439,7 @@
                       <!-- <span class="input-group-addon">Fliud LSM-Tree&nbsp;<input id="leveltier" name="ltradio" type="radio" aria-label="Fliud LSM-Tree" value="3" checked="false" onchange="MergeByFliudLSMTree()"/></span> -->
                     </div>
 
-                    <div id="input-group-T" class="input-group">
+                    <div id="input-group-T" class="input-group" style="display:none">
                       <span class="input-group-addon"><span data-tooltip="Ratio between capacities of adjacent levels (e.g., 2.0)." data-tooltip-position="bottom"> Size ratio</span></span>
                       <input id="lsm_tree_T" type="text" class="form-control" aria-label="Size Ratio T" placeholder="Ratio between capacities of adjacent levels (e.g., 2.0)" style="text-align:right" onchange="re_run(event, 'input8')" />
                       <!-- <span class="input-group-addon">(bytes)</span> -->
@@ -491,7 +498,7 @@
                         </span>
                     </div> -->
                     <div class="row" style="text-align: center">
-                      <h4 data-tooltip="B &epsilon;-tree" data-tooltip-position="bottom" >B<sup>&epsilon;</sup>-tree</h4>
+                      <span style="font-size:24px" id="B_epsilon_tree_title" data-tooltip="B &epsilon;-tree" data-tooltip-position="bottom" >B<sup>&epsilon;</sup>-tree</span>
                     </div>
 
 
@@ -520,10 +527,10 @@
                         </span>
                     </div> -->
                     <div class="row" style="text-align: center">
-                      <h4 data-tooltip="design continuum" data-tooltip-position="bottom" >CrimsonDB: Design Continuum</h4>
+                      <span style="font-size:24px" id="design_continuum_title" data-tooltip="design continuum" data-tooltip-position="bottom" >CrimsonDB: Design Continuum</span>
                     </div>
 
-                    <div class="input-group">
+                    <div class="input-group" style="display:none">
                     <span class="input-group-addon"><span data-tooltip="Grow factor (fanout in B tree or size ratio in LSM tree)" data-tooltip-position="bottom"> Growth Factor (T) </span></span>
                       <input id="design_continuum_T" type="number" class="form-control" aria-label="fanout" placeholder="T" style="text-align:right" onchange="re_run(event, 'input4')"/>
                     </div>

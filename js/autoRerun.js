@@ -52,7 +52,7 @@ function update_lsm_tree(id, lsm_tree_type, lsm_tree_L, lsm_tree_T, lsm_tree_mbu
   	draw_lsm_graph("lsm_tree");
 }
 
-function re_run(e) {
+function re_run(e, input_type) {
     if(timer){
         clearTimeout(timer);
         timer = null;
@@ -90,6 +90,7 @@ function re_run(e) {
     var P = parseInt(document.getElementById("P").value.replace(/\D/g,''),10);
     document.getElementById("N").value=numberWithCommas(N)
     var E = parseInt(document.getElementById("E").value.replace(/\D/g,''),10);
+
     var w=parseFloat(document.getElementById("w").value);
     var r=parseFloat(document.getElementById("r").value);
     var v=parseFloat(document.getElementById("v").value);
@@ -114,14 +115,9 @@ function re_run(e) {
       document.getElementById("Zero-result-lookup-text-Div").style.display='';
     }
 
-    document.getElementById("data_size_text").innerText=formatBytes(N*E,1);
-    document.getElementById("E_text").innerText = E;
-    document.getElementById("P_text").innerText = formatBytes(P,1);
-    document.getElementById("read_latency_text").innerText = document.getElementById("read-latency").value;
-    document.getElementById("write_latency_text").innerText = document.getElementById("write-latency").value;
-
+    var key_size;
     if(event.target.id == "Key-Size"){
-      var key_size = document.getElementById("Key-Size").value;
+      key_size = document.getElementById("Key-Size").value;
       if(isNaN(key_size)){
         alert("Key_Size="+key_size+" is not a valid number.")
         console.log("Key Size is not a valid number: "+key_size)
@@ -134,7 +130,28 @@ function re_run(e) {
         document.getElementById("lsm_bush_mfence_pointer_per_entry").value=key_size/(P/E)*8;
         document.getElementById("lsm_tree_mfence_pointer_per_entry").value=key_size/(P/E)*8;
       }
-      document.getElementById("key_size_text").value=key_size;
+    }
+
+    if(input_type == "dataset_input"){
+      document.getElementById("data-text").setAttribute("data-tooltip",
+      "The dataset consists of " + formatBytes(N*E, 1) +
+      " of data comprising unique " + E +
+      "-byte key-value pairs of " + key_size +
+      "-byte keys");
+    }else if(input_type == "workload_input"){
+      var sum = qL+r+v+w;
+      document.getElementById("workload-text").setAttribute("data-tooltip",
+      "The workload consists of " + (w/sum*100).toFixed(3) +
+      "% writes, " + ((v+r)/sum*100).toFixed(3) +
+      "% point lookups, and " + (qL/sum*100).toFixed(3) +
+      "% range lookups with target range of " + s +
+      " entries");
+    }else if(input_type == "storage_input"){
+      document.getElementById("storage-text").setAttribute("data-tooltip",
+      "The storage device is an SSD with " + formatBytes(P, 1) +
+      " blocks and for which reading a block takes " + document.getElementById("read-latency").value +
+      " microseconds and writing a block takes " + document.getElementById("write-latency").value +
+      " microseconds");
     }
 
     //lsh-Table
@@ -253,14 +270,19 @@ function re_run(e) {
 
     //B_epsilon tree
     var level = document.getElementById("B_epsilon_tree_level").value;
+    var max_b_epsilon_tree_level = Math.ceil(Math.log((N+1)/2)/Math.log(2) - 1);
     if(isNaN(level)){
       alert("Level ="+level+" is invalid.")
       console.log("Level is invalid: "+level);
-      level = 10;
+      level = Math.round((max_b_epsilon_tree_level+1)/3);
     }
+
     if (level<1){
         alert("Level="+level+" is too small in B Tree.");
-        level = 10;
+        level = Math.round((max_b_epsilon_tree_level+1)/3);
+    }else if(level > max_b_epsilon_tree_level){
+        alert("Level="+level+" is larger than the maximum level (" + max_b_epsilon_tree_level + ") in B Tree because the fanout should at least be 2.");
+        level = Math.round((max_b_epsilon_tree_level+1)/3);
     }
     document.getElementById("B_epsilon_tree_level").value = level;
 
@@ -437,12 +459,6 @@ function re_run_now() {
       document.getElementById("qL").value=1;
       qL = 1;
     }
-
-    var sum = qL+r+v+w;
-    document.getElementById("write-prop-text").textContent =(w/sum*100).toFixed(4);
-    document.getElementById("point-lookup-prop-text").textContent=((v+r)/sum*100).toFixed(4);
-    document.getElementById("range-lookup-prop-text").textContent=(qL/sum*100).toFixed(4);
-    document.getElementById("range-lookup-target-size-text").textContent = s;
 
 
 
