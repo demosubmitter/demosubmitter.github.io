@@ -53,9 +53,10 @@ function parseInputTextBoxes(prefix="lsm_tree")
 		// Configuration for an architecture
 		if(prefix == "lsm_tree" || prefix == "design_continuum"){
 			parsedBoxes.L = parseInt(document.getElementById(prefix+"_L").value.replace(/\D/g,''), 10);
-			parsedBoxes.isOptimalFPR = true;
+
 
 			if(prefix == "design_continuum"){
+				parsedBoxes.isOptimalFPR = true;
 				parsedBoxes.leveltier = 3;
 				parsedBoxes.fluidK = parseInt(document.getElementById("design_continuum_K").value.replace(/\D/g,''), 10);
 				parsedBoxes.fluidZ = parseInt(document.getElementById("design_continuum_Z").value.replace(/\D/g,''), 10);
@@ -64,6 +65,7 @@ function parseInputTextBoxes(prefix="lsm_tree")
 				parsedBoxes.D = parseInt(document.getElementById(prefix+"_D").value);
 				parsedBoxes.MF = parseFloat(document.getElementById(prefix+"_memory_budget").value)/8*tmpN;
 			}else if(prefix == "lsm_tree"){
+				parsedBoxes.isOptimalFPR = false;
 				parsedBoxes.leveltier = getBoldButtonByName(prefix+"_type");
 				parsedBoxes.T = parseFloat(document.getElementById(prefix+"_T").value);
 				if(parsedBoxes.leveltier == 0){
@@ -986,8 +988,8 @@ function init(){
 
 	document.getElementById("Leveling").style.fontWeight='bold';
 	document.getElementById("Leveling").style.fontSize='16px';
-	document.getElementById("Optimal-FPR").style.fontWeight='bold';
-	document.getElementById("Optimal-FPR").style.fontSize='16px';
+	//document.getElementById("Optimal-FPR").style.fontWeight='bold';
+	//document.getElementById("Optimal-FPR").style.fontSize='16px';
 
 	initScenario1();
 	initScenario2();
